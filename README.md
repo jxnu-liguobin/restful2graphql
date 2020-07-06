@@ -28,4 +28,8 @@ graphql-expand
 2. restful 处理转化到 graphql 时，丢失 graphql 的可选择性获取字段，组装等功能
 3. 为了处理转化，可对 Method、URI、RequestBody 进行初步校验，后者需要JSON解析，对于大 body 需要一定的耗时
 4. 需要一个新的转发服务
+5. 由于 graphql 必须指定返回字段，所以使用 restful 转换时，只能返回所有字段，也就是不具备选择功能
 
+**难点**
+* query 拼接
+* restful 映射到 graphql query

@@ -1,0 +1,9 @@
+type PostsQuery {
+    post(postId: Int!): [Post]
+    posts: [Post]
+}
+
+type PostsMutation {
+    createPost(post:InputPost!): Post
+    updatePost(postId: Int!, post:InputPost!): Post
+}

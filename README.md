@@ -8,10 +8,13 @@ graphql-expand
 
 针对通用 restful 接口，其中 requestBody 是可选，每个资源有以下四个独立接口：
 
-1. GET /resource/:resource_id
-2. GET /resources
-3. PUT /resource/:resource_id [requestBody]
-4. POST /resource [requestBody]
+1. GET /rest/:resource/:resource_id
+2. GET /rest/:resources
+3. PUT /rest/:resource/:resource_id [requestBody]
+4. POST /rest/:resource [requestBody]
+
+resource => graphql field operationName
+requestBody => graphql field variables
 
 两者比较：
 

@@ -7,7 +7,7 @@ package io.growing.graphql
  */
 object RestMethod extends Enumeration {
 
-  type RestMethod = Value
+  type HttpMethod = Value
 
   val POST = Value("post")
   val DELETE = Value("delete")

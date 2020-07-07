@@ -3,8 +3,6 @@ name := "graphql-expand-scala"
 version := "0.1"
 
 scalaVersion := "2.12.11"
-val akkaHttpV = "10.1.1"
-val akkaV = "2.5.12"
 
 organization := "io.growing.graphql"
 
@@ -15,11 +13,10 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.11.0",
   "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % "2.11.0",
   "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.11.0",
-  "org.scala-lang" % "scala-reflect" % "2.12.11",
   "org.apache.commons" % "commons-lang3" % "3.10",
   "com.google.guava" % "guava" % "29.0-jre",
-  "com.typesafe.akka" %% "akka-actor" % akkaV,
-  "com.typesafe.akka" %% "akka-stream" % akkaV,
-  "com.typesafe.akka" %% "akka-http" % akkaHttpV,
-  "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpV
+  "com.typesafe.akka" %% "akka-actor" % "2.5.12",
+  "com.typesafe.akka" %% "akka-stream" % "2.5.12",
+  "com.typesafe.akka" %% "akka-http" % "10.1.1",
+  "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.1"
 )

@@ -11,6 +11,13 @@ package io.growing.graphql.request
  */
 class GraphqlRequest(operationName: String, variables: Option[String] = None, query: String) extends Request {
 
-  override def toString: String = super.toString
-
+  override def toString: String = {
+    s"""
+       |{
+       |  "operationName": "$operationName",
+       |  "variables": ${variables.get},
+       |  "query": "${query.replace("\n", "").trim}"
+       |}
+       |""".stripMargin
+  }
 }

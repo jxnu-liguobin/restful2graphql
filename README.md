@@ -16,6 +16,7 @@ graphql-expand
 
 resource => graphql field operationName
 requestBody => graphql field variables
+resource_id => graphql fetcher param 查询单个、更新单个、删除单个必须有 resource_id 参数，其他批量操作使用 requestBody
 
 两者比较：
 
@@ -35,5 +36,47 @@ requestBody => graphql field variables
 5. 由于 graphql 必须指定返回字段，所以使用 restful 转换时，只能返回所有字段，也就是不具备选择功能
 
 **难点**
-* query 拼接
+* query 拼接，可以使用自动生成工具，减小难度
 * restful 映射到 graphql query
+
+**query generator**
+- 使用 https://github.com/timqian/gql-generator 前端工具，自动生成 gql。
+- 执行 gqlg --schemaFilePath src/main/resources/all.graphql --destDirPath src/main/resources/gql --depthLimit 5
+
+**示例**
+1.所有 graphql schema 放在 all.graphql 中
+2.启动 ForwardServer.scala
+3.使用 restful 请求 graphql
+
+**使用 restful 完成 crud**
+
+- GET localhost:8080/rest/userVariables 
+    - 将会调用 graphql `userVariables: [UserVariable]`
+- POST localhost:8080/rest/userVariable 
+    - 将会调用 graphql `createUserVariable(userVariable: VariableInput!): UserVariable!`
+```json
+{
+    "userVariable": {
+        "name": "测试graphql",
+        "key": "test_132",
+        "valueType": "int",
+        "description": "132"
+    }
+}
+```
+- DELETE localhost:8080/rest/userVariable/y9pmLdQm # y9pmLdQm是一个HashId
+    - 将会调用 graphql `deleteUserVariable(id: HashId!): Boolean!`
+- PUT localhost:8080/rest/userVariable/y9pmLdQm
+    - 将会调用 graphql `updateUserVariable(id: HashId!, userVariable: VariableInput!): UserVariable!` json解析问题，暂不通
+```json
+{
+    "userVariable": {
+        "name": "测试graphql",
+        "key": "test_132",
+        "valueType": "int",
+        "description": "132"
+    }
+}
+```
+
+批量操作，未测

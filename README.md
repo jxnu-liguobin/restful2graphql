@@ -6,13 +6,15 @@ graphql-expand
 
 目前发现，将 restful API 转发到 graphql API，是一种比较折中的方案。
 
-针对通用 restful 接口，其中 requestBody 是可选，每个资源有以下四个独立接口：
+针对通用 restful 接口，其中 requestBody 是可选，每个资源有以下五个独立接口，分四种类型：
 
 1. GET /rest/:resource/:resource_id
 2. GET /rest/:resources
-3. PUT /rest/:resource/:resource_id             [requestBody]
-4. POST /rest/:resource             [requestBody]
-5. DELETE /rest/:resource/:resource_id
+3. PUT /rest/:resource/:resource_id             (requestBody)
+4. POST /rest/:resource             (requestBody)
+5. DELETE /rest/:resource/:resource_id 
+6. DELETE /rest/:resources
+(requestBody)
 
 - resource => graphql field operationName
 - requestBody => graphql field variables

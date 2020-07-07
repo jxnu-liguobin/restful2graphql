@@ -2,7 +2,7 @@ graphql-expand
 --
 
 基于纯 graphql 的后端服务，提供的 Open API 也是一个 graphql 接口。
-对于不熟悉的人来说，可读性不高，使用不变，与现有广泛存在的 restful API 差异明显。
+对于不熟悉的人来说，可读性不高，使用不便，与现有广泛存在的 restful API 差异明显。
 
 目前发现，将 restful API 转发到 graphql API，是一种比较折中的方案。
 
@@ -31,7 +31,7 @@ graphql-expand
 **缺点**
 1. 丢失类型安全和错误校验功能，错误最终只能在 graphql 处理时才能判断，不能在 restful 转化到 graphql 时准确判断
 2. restful 处理转化到 graphql 时，丢失 graphql 的可选择性获取字段，组装等功能
-3. 为了处理转化，可对 Method、URI、RequestBody 进行初步校验，后者需要JSON解析，对于大 body 需要一定的耗时
+3. 为了处理转化，可对 Method、URI、RequestBody 无法进行校验
 4. 需要一个新的转发服务
 5. 由于 graphql 必须指定返回字段，所以使用 restful 转换时，只能返回所有字段，也就是不具备选择功能
 
@@ -44,9 +44,9 @@ graphql-expand
 - 执行 gqlg --schemaFilePath src/main/resources/all.graphql --destDirPath src/main/resources/gql --depthLimit 5
 
 **示例**
-1.所有 graphql schema 放在 all.graphql 中
-2.启动 ForwardServer.scala
-3.使用 restful 请求 graphql
+1. 所有 graphql schema 放在 all.graphql 中
+2. 启动 ForwardServer.scala
+3. 使用 restful 请求 graphql
 
 **使用 restful 完成 crud**
 
@@ -79,6 +79,12 @@ graphql-expand
 }
 ```
 
-更新和创建涉及的json解析问题，存在问题
+更新和创建涉及json转义，存在问题，目前只支持，标准 result api 的 crud。
+1. 查询一个
+2. 查询所有
+3. 更新
+4. 创建
+5. 删除
+6. 批量删除
 
 批量操作，未测

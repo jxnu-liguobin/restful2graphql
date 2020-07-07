@@ -1,5 +1,6 @@
 package io.growing.graphql.utils
 
+import java.io.{ BufferedWriter, File, FileWriter }
 import java.nio.file.Paths
 import java.util.regex.Pattern
 
@@ -54,36 +55,16 @@ class GraphqlSchemaScanner(classPath: ClassPath, root: String) {
 }
 
 object GraphqlSchemaScannerTest extends App {
+
   val scanner = new GraphqlSchemaScanner(ClassPath.from(this.getClass.getClassLoader), "graphql")
   val ret = scanner.scan()
-  //type Query {
-  //    posts: [Post]
-  //}
-  //
-  //type Mutation {
-  //    createPost(post:InputPost): Post
-  //    updatePost(postId: Int!): Post
-  //}
-  //
-  //type Author  {
-  //    id: Int!
-  //    firstName: String
-  //    lastName: String
-  //    posts: [Post]
-  //}
-  //
-  //type Post  {
-  //    id: Int!
-  //    title: String
-  //    author: Author
-  //    votes: Int
-  //}
-  //
-  //input InputPost {
-  //    title: String
-  //    authorId: Int!
-  //}
-  //
+  val file = new File("src/main/scala/io/growing/graphql/schema/all.graphql")
+  if (!file.exists) file.createNewFile
+  val fw = new FileWriter(file.getAbsoluteFile)
+  val bw = new BufferedWriter(fw)
+  bw.write("# create auto, do not edit it\n")
+  bw.write(ret)
+  bw.flush()
   println(ret)
 
 }

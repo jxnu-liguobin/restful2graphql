@@ -10,8 +10,9 @@ graphql-expand
 
 1. GET /rest/:resource/:resource_id
 2. GET /rest/:resources
-3. PUT /rest/:resource/:resource_id [requestBody]
-4. POST /rest/:resource [requestBody]
+3. PUT /rest/:resource/:resource_id             [requestBody]
+4. POST /rest/:resource             [requestBody]
+5. DELETE /rest/:resource/:resource_id
 
 resource => graphql field operationName
 requestBody => graphql field variables

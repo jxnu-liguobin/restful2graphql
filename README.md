@@ -14,9 +14,9 @@ graphql-expand
 4. POST /rest/:resource             [requestBody]
 5. DELETE /rest/:resource/:resource_id
 
-resource => graphql field operationName
-requestBody => graphql field variables
-resource_id => graphql fetcher param 查询单个、更新单个、删除单个必须有 resource_id 参数，其他批量操作使用 requestBody
+- resource => graphql field operationName
+- requestBody => graphql field variables
+- resource_id => graphql fetcher param 查询单个、更新单个、删除单个必须有 resource_id 参数，其他批量操作使用 requestBody
 
 两者比较：
 
@@ -67,7 +67,7 @@ resource_id => graphql fetcher param 查询单个、更新单个、删除单个�
 - DELETE localhost:8080/rest/userVariable/y9pmLdQm # y9pmLdQm是一个HashId
     - 将会调用 graphql `deleteUserVariable(id: HashId!): Boolean!`
 - PUT localhost:8080/rest/userVariable/y9pmLdQm
-    - 将会调用 graphql `updateUserVariable(id: HashId!, userVariable: VariableInput!): UserVariable!` json解析问题，暂不通
+    - 将会调用 graphql `updateUserVariable(id: HashId!, userVariable: VariableInput!): UserVariable!`
 ```json
 {
     "userVariable": {
@@ -78,5 +78,7 @@ resource_id => graphql fetcher param 查询单个、更新单个、删除单个�
     }
 }
 ```
+
+更新和创建涉及的json解析问题，存在问题
 
 批量操作，未测

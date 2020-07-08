@@ -3,6 +3,8 @@ graphql-expand
 
 ## 概述
 
+**目的：像使用 restful api 一样使用 graphql api**
+
 基于纯 graphql 的后端服务，提供的 Open API 也是一个 graphql 接口。
 对于不熟悉的人来说，可读性不高，使用不便，与现有广泛存在的 restful API 差异明显。
 
@@ -42,14 +44,34 @@ graphql-expand
 3. RequestBody 无法提前进行校验
 4. 需要一个新的转发服务
 5. 由于 graphql 必须指定返回字段，所以使用 restful 转换时，只能返回所有字段，也就是不具备选择功能
+6. 订阅功能缺失
 
 **难点**
 * query 拼接，可以使用自动生成工具，减小难度
 * restful 映射到 graphql query
 
-## query generator
+## 使用技术
 
-利用前端代码生成 graphql query 语句，每个 gql 对应服务端的一个 data fetcher 
+* akka-http
+* spray-json
+* okhttp
+
+
+目前只支持，标准 result api 的 crud 转发到 graphql 的 mutation 和 query 
+
+1. 查询一个
+2. 查询所有
+3. 更新
+4. 创建
+5. 删除
+6. 批量删除
+7. 批量更新
+
+批量操作，未测
+
+## 示例
+
+首先利用前端代码生成 graphql query 语句，每个 gql 对应服务端的一个 data fetcher 
 
 - 使用 https://github.com/timqian/gql-generator 前端工具，自动生成 gql。
 - 执行 gqlg --schemaFilePath src/main/resources/all.graphql --destDirPath src/main/resources/gql --depthLimit 5
@@ -57,8 +79,6 @@ graphql-expand
 在 all.graphql 中是所有需要转发的 graphql schmea。最终会在 gql/ 目录下生成所有 *.gql 语句。
 
 > 这里自动生成的语句实际会有很多的多余字段，需要排除掉。
-
-## 示例
 
 1. 所有 graphql schema 放在 all.graphql 中
 2. 启动 ForwardServer.scala
@@ -128,22 +148,3 @@ restful {
 
 }
 ```
-
-## 使用技术
-
-* akka-http
-* spray-json
-* okhttp
-
-
-更新和创建涉及json转义，存在问题，目前只支持，标准 result api 的 crud
-
-1. 查询一个
-2. 查询所有
-3. 更新
-4. 创建
-5. 删除
-6. 批量删除
-7. 批量更新
-
-批量操作，未测

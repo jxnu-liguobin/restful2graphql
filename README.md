@@ -49,6 +49,7 @@ graphql-expand
 **难点**
 * query 拼接，可以使用自动生成工具，减小难度
 * restful 映射到 graphql query
+* 如何忽略生成的 gql 中的多余字段
 
 ## 使用技术
 

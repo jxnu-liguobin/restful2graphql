@@ -3,18 +3,23 @@ package io.growing.graphql
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity }
 import akka.http.scaladsl.server.{ HttpApp, Route }
 import io.growing.graphql.request.RestRequest
-import io.growing.graphql.utils.GraphqlScanner
+import io.growing.graphql.utils.{ Config, GraphqlScanner }
+import io.growing.graphql.utils.JsonMarshallers._
+import spray.json._
 
 import scala.concurrent.Future
 
 /**
+ * 使用akkahttp转发请求
  *
  * @author liguobin@growingio.com
  * @version 1.0,2020/7/7
  */
 object ForwardServer extends HttpApp with App {
 
-  val responseJsonData: Future[String] => Route = (result: Future[String]) => onSuccess(result) { r => complete(HttpEntity(ContentTypes.`application/json`, r)) }
+  private val (host, port) = Config.getRestfulServerConfig()
+
+  private val responseJsonData: Future[String] => Route = (result: Future[String]) => onSuccess(result) { r => complete(HttpEntity(ContentTypes.`application/json`, r)) }
 
   implicit lazy val operationQueryMappings: Map[String, String] = GraphqlScanner.createOperationQueryMappings()
 
@@ -36,7 +41,7 @@ object ForwardServer extends HttpApp with App {
           ~ put {
           //更新
           decodeRequest {
-            entity(as[String]) { requestBody =>
+            entity(as[JsValue]) { requestBody =>
               //需要组合requestBody和queryParams
               val req = RestRequest(restOperation = RestOperation.UPDATE, requestBody = Some(requestBody), resource = typ, queryParams = Map("id" -> id))
               val ret = GraphqlExecution.executeRequest(req.toGraphqlRequest())
@@ -51,8 +56,8 @@ object ForwardServer extends HttpApp with App {
           get {
             //查询列表，批量查询
             decodeRequest {
-              entity(as[String]) { requestBody =>
-                val req = RestRequest(restOperation = RestOperation.GET, requestBody =  Some(requestBody), resource = typ, queryParams = Map.empty, isBatch = true)
+              entity(as[JsValue]) { requestBody =>
+                val req = RestRequest(restOperation = RestOperation.GET, requestBody = Some(requestBody), resource = typ, queryParams = Map.empty, isBatch = true)
                 val ret = GraphqlExecution.executeRequest(req.toGraphqlRequest())
                 responseJsonData(ret)
               }
@@ -62,7 +67,7 @@ object ForwardServer extends HttpApp with App {
             post {
               //创建
               decodeRequest {
-                entity(as[String]) { requestBody =>
+                entity(as[JsValue]) { requestBody =>
                   val req = RestRequest(restOperation = RestOperation.CREATE, requestBody = Some(requestBody), resource = typ, queryParams = Map.empty)
                   val ret = GraphqlExecution.executeRequest(req.toGraphqlRequest())
                   responseJsonData(ret)
@@ -74,7 +79,7 @@ object ForwardServer extends HttpApp with App {
             delete {
               //批量删除
               decodeRequest {
-                entity(as[String]) { requestBody =>
+                entity(as[JsValue]) { requestBody =>
                   val req = RestRequest(restOperation = RestOperation.DELETE, requestBody = Some(requestBody), resource = typ, queryParams = Map.empty, isBatch = true)
                   val ret = GraphqlExecution.executeRequest(req.toGraphqlRequest())
                   responseJsonData(ret)
@@ -85,5 +90,5 @@ object ForwardServer extends HttpApp with App {
         )
       }
 
-  ForwardServer.startServer("localhost", 8080)
+  ForwardServer.startServer(host, port)
 }

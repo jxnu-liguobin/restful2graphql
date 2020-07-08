@@ -2,28 +2,32 @@ package io.growing.graphql
 
 import java.io.IOException
 
-import com.google.common.net.HttpHeaders
+import com.typesafe.scalalogging.LazyLogging
 import io.growing.graphql.request.GraphqlRequest
-import io.growing.graphql.utils.{ JacksonScalaSupport, OkHttp }
+import io.growing.graphql.utils.{ Config, JacksonScalaSupport, OkHttp }
 import okhttp3._
 
-import scala.concurrent.duration.Duration
 import scala.concurrent.{ Await, Future, Promise }
+import scala.concurrent.duration.Duration
 
 /**
  *
  * @author liguobin@growingio.com
  * @version 1.0,2020/7/7
  */
-object GraphqlExecution extends App {
+object GraphqlExecution extends App with LazyLogging{
 
+  //因为有main方法，全局变量加载拿不到值，必须加lazy
+
+  private lazy val json = MediaType.parse("application/json; charset=utf-8")
+  private lazy val charset = "utf8"
 
   def executeRequest(request: GraphqlRequest): Future[String] = {
-    val json = MediaType.parse("application/json; charset=utf-8")
     val body = request.toString
-    println("graphql request\n" + body)
-    val url = s"http://localhost:8086/projects/WlGk4Daj/graphql"
-    val rb = new Request.Builder().url(url).addHeader(HttpHeaders.USER_AGENT, "X-User-Id")
+    logger.info(s"graphql request:\n $body")
+    val url = Config.getGraphqlUrl
+    val (authKey, authValue) = Config.getAuthHeader()
+    val rb = new Request.Builder().url(url).addHeader(authKey, authValue)
       .post(RequestBody.create(body, json))
     val promise = Promise[String]
 
@@ -36,7 +40,7 @@ object GraphqlExecution extends App {
       override def onResponse(call: Call, response: Response): Unit = {
         if (response.isSuccessful) {
           val bytes = response.body().bytes()
-          promise.success(new String(bytes, "utf8"))
+          promise.success(new String(bytes, charset))
         } else {
           val r: String = JacksonScalaSupport.mapper.writeValueAsString(response)
           promise.failure(new Exception(r))

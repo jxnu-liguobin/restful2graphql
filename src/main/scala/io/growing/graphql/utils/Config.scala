@@ -12,8 +12,9 @@ import scala.util.Try
  */
 object Config {
 
-  val exclude = "graphql.exclude"
-  val include = "graphql.include"
+  private val exclude = "graphql.exclude"
+  private val auth = "graphql.auth"
+  private val restful = "restful"
   private lazy val config = ConfigFactory.load(this.getClass.getClassLoader)
 
   /**
@@ -26,4 +27,32 @@ object Config {
     Try(config.getConfig(exclude).getList(operationName).unwrapped().asScala.map(_.toString).toList).getOrElse(List.empty[String])
   }
 
+  /**
+   * graphql服务地址
+   *
+   * @return
+   */
+  def getGraphqlUrl = config.getString("graphql.url")
+
+  /**
+   * graphql鉴权请求头的key,value
+   *
+   * @return
+   */
+  def getAuthHeader(): (String, String) = {
+    val key = config.getConfig(auth).getString("key")
+    val value = config.getConfig(auth).getString("value")
+    key -> value
+  }
+
+  /**
+   * restful转发服务的地址
+   *
+   * @return
+   */
+  def getRestfulServerConfig(): (String, Int) = {
+    val host = config.getConfig(restful).getString("host")
+    val port = config.getConfig(restful).getInt("port")
+    host -> port
+  }
 }

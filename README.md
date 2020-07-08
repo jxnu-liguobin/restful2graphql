@@ -95,6 +95,47 @@ graphql-expand
 }
 ```
 
+## 可选配置
+
+```
+graphql {
+
+  exclude {
+
+   # 因为定义的是必须存在，查出的数可能为空，不兼容，需要排除，对于嵌套逻辑只需要排除最外层
+   userVariables = ["projectId", "type", "valueType"]
+   updateSegment = ["projectId", "description", "compute", "scheduler", "creatorId","createdAt","updaterId","updatedAt","creator","updater", "createdBy","detector"]
+   createSegment = ["projectId", "description", "compute", "scheduler", "creatorId","createdAt","updaterId","updatedAt","creator","updater", "createdBy","detector"]
+  }
+
+  # graphql服务的地址
+  url = "http://localhost:8086/projects/WlGk4Daj/graphql"
+
+
+  # graphql鉴权请求头的key
+  auth {
+
+    key = "X-User-Id"
+    value = "1"
+
+  }
+}
+
+restful {
+
+  host = "localhost"
+  port = 8080
+
+}
+```
+
+## 使用技术
+
+* akka-http
+* spray-json
+* okhttp
+
+
 更新和创建涉及json转义，存在问题，目前只支持，标准 result api 的 crud
 
 1. 查询一个

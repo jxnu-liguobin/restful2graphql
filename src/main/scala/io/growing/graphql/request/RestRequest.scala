@@ -1,7 +1,9 @@
 package io.growing.graphql.request
 
+import com.typesafe.scalalogging.LazyLogging
 import io.growing.graphql.RestOperation
 import io.growing.graphql.RestOperation.RestOperation
+import spray.json.{ JsObject, JsString, JsValue }
 
 /**
  * restful标准请求
@@ -15,7 +17,9 @@ import io.growing.graphql.RestOperation.RestOperation
  * @param isBatch       查询和删除需要区分批量
  */
 case class RestRequest(restOperation: RestOperation, resource: String, queryParams: Map[String, String] = Map.empty,
-  requestBody: Option[String] = None, isBatch: Boolean = false) extends Request {
+  requestBody: Option[JsValue] = None, isBatch: Boolean = false) extends Request with LazyLogging {
+
+  private val empty = JsObject.empty
 
   /**
    * 获取rest的请求体，这个也是graphql请求传递的变量，该参数可选
@@ -23,18 +27,19 @@ case class RestRequest(restOperation: RestOperation, resource: String, queryPara
    * @return
    */
   def getRequestBody: String = {
-    if (queryParams.isEmpty) if (requestBody.isEmpty || requestBody.get == "") "{}" else requestBody.getOrElse("{}")
-    else {
-      val hashId =
-        s"""
-           |"id": "${queryParams("id")}",
-           |""".stripMargin
-      val vars = new StringBuilder
-      vars.append("{").append(hashId)
-      //说明不是默认是空花括号，需要去除逗号
-      if (requestBody.getOrElse("{}").length == 2) vars.deleteCharAt(hashId.length - 1)
-      vars.append(requestBody.getOrElse("{}").replaceFirst("\\{", ""))
-      vars.toString()
+    if (queryParams.isEmpty) {
+      val ret = if (requestBody.isEmpty) empty else requestBody.getOrElse(empty)
+      ret.prettyPrint
+    } else {
+      val originFields = requestBody.getOrElse(empty).asJsObject.fields
+      val newRequestBody = if (originFields.keySet.contains("id")) {
+        requestBody.getOrElse(empty).asJsObject
+      } else {
+        requestBody.getOrElse(empty).asJsObject.copy(fields = originFields ++ Map("id" -> JsString(queryParams("id"))))
+
+      }
+      logger.info(s"build restful request body: \nnewRequestBody.prettyPrint")
+      newRequestBody.prettyPrint
     }
 
   }
@@ -46,7 +51,7 @@ case class RestRequest(restOperation: RestOperation, resource: String, queryPara
    * @return
    */
   def getOperationName: String = {
-    restOperation match {
+    val operation = restOperation match {
       case RestOperation.CREATE => restOperation.toString + resource.capitalize
       case RestOperation.DELETE if isBatch => "batch" + restOperation.toString.capitalize + resource.capitalize
       case RestOperation.DELETE => restOperation.toString + resource.capitalize
@@ -55,6 +60,8 @@ case class RestRequest(restOperation: RestOperation, resource: String, queryPara
       case RestOperation.UPDATE if isBatch => "batch" + restOperation.toString.capitalize + resource.capitalize
       case RestOperation.UPDATE => restOperation.toString + resource.capitalize
     }
+    logger.info(s"build restful request method mapping to graphql fetcher: $operation")
+    operation
   }
 
   /**
@@ -64,7 +71,9 @@ case class RestRequest(restOperation: RestOperation, resource: String, queryPara
    * @return
    */
   def toGraphqlRequest()(implicit operationQueryMappings: Map[String, String]): GraphqlRequest = {
+    val currentOperation = operationQueryMappings(this.getOperationName)
+    logger.info(s"get graphql fetcher name: $currentOperation")
     new GraphqlRequest(operationName = this.getOperationName, variables = Some(this.getRequestBody),
-      query = operationQueryMappings(this.getOperationName))
+      query = currentOperation)
   }
 }

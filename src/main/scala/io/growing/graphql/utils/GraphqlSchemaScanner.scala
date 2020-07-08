@@ -97,7 +97,6 @@ class GraphqlQueryScanner(classPath: ClassPath, root: String) {
               if (q.contains("}")) {
                 countRight += 1
               }
-              println(s"start: $countLeft, end $countRight")
               if(countLeft >= countRight) "" else q
             } else {
               q

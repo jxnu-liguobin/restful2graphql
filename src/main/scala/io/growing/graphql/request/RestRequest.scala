@@ -38,7 +38,7 @@ case class RestRequest(restOperation: RestOperation, resource: String, queryPara
         requestBody.getOrElse(empty).asJsObject.copy(fields = originFields ++ Map("id" -> JsString(queryParams("id"))))
 
       }
-      logger.info(s"build restful request body: \nnewRequestBody.prettyPrint")
+      logger.info(s"build restful request body: \n${newRequestBody.prettyPrint}")
       newRequestBody.prettyPrint
     }
 

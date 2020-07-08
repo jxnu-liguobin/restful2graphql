@@ -87,9 +87,10 @@ graphql-expand
 **使用 restful 完成 crud**
 
 - GET localhost:8080/rest/userVariables 
-    - 将会使用 HTTP 调用 graphql `userVariables: [UserVariable]`
+    - 将会使用 HTTP 调用 graphql api: `userVariables: [UserVariable]`
 - POST localhost:8080/rest/userVariable 
-    - 将会使用 HTTP 调用 graphql `createUserVariable(userVariable: VariableInput!): UserVariable!`
+    - 将会使用 HTTP 调用 graphql api: `createUserVariable(userVariable: VariableInput!): UserVariable!`
+    - requestBody 
 ```json
 {
     "userVariable": {
@@ -100,10 +101,28 @@ graphql-expand
     }
 }
 ```
+如果使用 graphql ，那么这个请求体长这样：
+```json
+{
+    "operationName": "createUserVariable",
+    "variables": {
+        "userVariable": {
+            "name": "测试graphql",
+            "key": "test_132",
+            "valueType": "int",
+            "description": "132"
+        }
+    },
+    "query": "mutation createUserVariable($userVariable: VariableInput!) {\n  createUserVariable(userVariable: $userVariable) {\n    name\n    __typename\n  }\n}\n"
+}
+```
+对用户来说，query 的拼写是痛苦的。
+
 - DELETE localhost:8080/rest/userVariable/y9pmLdQm # y9pmLdQm是一个HashId
-    - 将会使用 HTTP 调用 graphql `deleteUserVariable(id: HashId!): Boolean!`
+    - 将会使用 HTTP 调用 graphql api: `deleteUserVariable(id: HashId!): Boolean!`
 - PUT localhost:8080/rest/userVariable/y9pmLdQm
-    - 将会使用 HTTP 调用 graphql `updateUserVariable(id: HashId!, userVariable: VariableInput!): UserVariable!`
+    - 将会使用 HTTP 调用 graphql api: `updateUserVariable(id: HashId!, userVariable: VariableInput!): UserVariable!`
+    - requestBody 当 id 字段在路径参数和 requestBody 都存在时，只会使用 requestBody 的
 ```json
 {
     "userVariable": {

@@ -87,6 +87,18 @@ object ForwardServer extends HttpApp with App {
                 }
               }
             }
+            ~
+            put {
+              //批量更新
+              decodeRequest {
+                entity(as[JsValue]) { requestBody =>
+                  val req = RestRequest(restOperation = RestOperation.UPDATE, requestBody = Some(requestBody), resource = typ, queryParams = Map.empty, isBatch = true)
+                  val ret = GraphqlExecution.executeRequest(req.toGraphqlRequest())
+                  responseJsonData(ret)
+
+                }
+              }
+            }
         )
       }
 

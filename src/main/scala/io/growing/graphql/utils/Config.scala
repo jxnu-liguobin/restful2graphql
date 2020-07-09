@@ -13,8 +13,9 @@ import scala.util.Try
 object Config {
 
   private val exclude = "graphql.exclude"
+  //for test
   private val auth = "graphql.auth"
-  private val restful = "restful"
+  private val restful = "dryad.service.http"
   private lazy val config = ConfigFactory.load(this.getClass.getClassLoader)
 
   /**
@@ -35,24 +36,32 @@ object Config {
   def getGraphqlUrl = config.getString("graphql.url")
 
   /**
-   * graphql鉴权请求头的key,value
+   * graphql鉴权请求头的key
    *
    * @return
    */
-  def getAuthHeader(): (String, String) = {
+  def getAuthKey(): String = {
     val key = config.getConfig(auth).getString("key")
-    val value = config.getConfig(auth).getString("value")
-    key -> value
+    key
   }
 
   /**
-   * restful转发服务的地址
+   * restful转发服务的地址和端口
    *
    * @return
    */
   def getRestfulServerConfig(): (String, Int) = {
-    val host = config.getConfig(restful).getString("host")
+    val host = Try(config.getConfig(restful).getString("host")).getOrElse("0.0.0.0")
     val port = config.getConfig(restful).getInt("port")
     host -> port
+  }
+
+  /**
+   * 从配置获取restful前缀
+   *
+   * @return
+   */
+  def getRestUriPrefix(): String = {
+    config.getConfig(restful).getString("prefix")
   }
 }

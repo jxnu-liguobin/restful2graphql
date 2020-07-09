@@ -14,13 +14,13 @@ graphql-expand
 
 实际 URI 只有两种格式
 
-1. GET /rest/:resource/:resource_id
-2. GET /rest/:resources
-3. PUT /rest/:resource/:resource_id             (requestBody)
-4. PUT /rest/:resources             (requestBody 有id)
-5. POST /rest/:resource             (requestBody)
-6. DELETE /rest/:resource/:resource_id 
-7. DELETE /rest/:resources          (requestBody)
+1. GET      /v3/projects/:project_id/:resource/:resource_id
+2. GET      /v3/projects/:project_id/:resources
+3. PUT      /v3/projects/:project_id/:resource/:resource_id             (requestBody)
+4. PUT      /v3/projects/:project_id/:resources             (requestBody 有id)
+5. POST     /v3/projects/:project_id/:resource             (requestBody)
+6. DELETE   /v3/projects/:project_id/:resource/:resource_id 
+7. DELETE   /v3/projects/:project_id/:resources          (requestBody)
 
 - resource => graphql field operationName
 - requestBody => graphql field variables
@@ -50,12 +50,18 @@ graphql-expand
 * query 拼接，可以使用自动生成工具，减小难度
 * restful 映射到 graphql query
 * 如何忽略生成的 gql 中的多余字段
+* restful api 需要注册到服务注册中心供其他服务能调用（不关心被调用的 graphql api）
+
+**注册实现**
+
+* 采用 dryad，仅注册一个 URI `/v3/projects/:project_id/:resource/([\w]+)`
 
 ## 使用技术
 
 * akka-http
 * spray-json
 * okhttp
+* dryad
 
 
 目前只支持，标准 result api 的 crud 转发到 graphql 的 mutation 和 query 
@@ -70,6 +76,8 @@ graphql-expand
 
 批量操作，未测
 
+目前 graphql 没有版本划分，暂不考虑
+
 ## 示例
 
 首先利用前端代码生成 graphql query 语句，每个 gql 对应服务端的一个 data fetcher 
@@ -82,14 +90,14 @@ graphql-expand
 > 这里自动生成的语句实际会有很多的多余字段，需要排除掉。
 
 1. 所有 graphql schema 放在 all.graphql 中
-2. 启动 ForwardServer.scala
+2. 启动 Rest2GraphqlForwardServer.scala
 3. 使用 restful 请求 graphql
 
 **使用 restful 完成 crud**
 
-- GET localhost:8080/rest/userVariables 
+- GET http://localhost:8080/v3/projects/WlGk4Daj/userVariables 
     - 将会使用 HTTP 调用 graphql api: `userVariables: [UserVariable]`
-- POST localhost:8080/rest/userVariable 
+- POST http://localhost:8080/v3/projects/WlGk4Daj/userVariable 
     - 将会使用 HTTP 调用 graphql api: `createUserVariable(userVariable: VariableInput!): UserVariable!`
     - requestBody 
 ```json
@@ -119,11 +127,11 @@ graphql-expand
 ```
 对用户来说，query 的拼写是痛苦的。
 
-- DELETE localhost:8080/rest/userVariable/y9pmLdQm # y9pmLdQm是一个HashId
+- DELETE http://localhost:8080/v3/projects/WlGk4Daj/userVariable/y9pmLdQm # y9pmLdQm是一个HashId
     - 将会使用 HTTP 调用 graphql api: `deleteUserVariable(id: HashId!): Boolean!`
-- PUT localhost:8080/rest/userVariable/y9pmLdQm
+- PUT http://localhost:8080/v3/projects/WlGk4Daj/userVariable/y9pmLdQm
     - 将会使用 HTTP 调用 graphql api: `updateUserVariable(id: HashId!, userVariable: VariableInput!): UserVariable!`
-    - requestBody 当 id 字段在路径参数和 requestBody 都存在时，只会使用 requestBody 的
+    - requestBody 当 id 字段在路径参数和 requestBody 都存在时，只会使用路径参数的
 ```json
 {
     "userVariable": {
@@ -149,22 +157,46 @@ graphql {
   }
 
   # graphql服务的地址
-  url = "http://localhost:8086/projects/WlGk4Daj/graphql"
+  # url = "http://localhost:8086/projects/%s/graphql"
+  url = "http://gdp-dev.growingio.com/graphql"
 
-
-  # graphql鉴权请求头的key
+  # graphql鉴权请求头的key，应该在 restful 请求时携带服务器的InternalToken，这里默认使用 cookie （可以使用 token 或者 cookie）
   auth {
-
-    key = "X-User-Id"
-    value = "1"
-
+    # 必须传
+    key = "Cookie"
   }
 }
 
-restful {
+# dryad框架的参数
+dryad {
 
-  host = "localhost"
-  port = 8080
+  enabled = true
+
+  namespace = "gio-graphql-forawrd"
+  group = "k8s-datatest"
+
+  provider = "io.growing.dryad.consul.provider.ConsulConfigProvider"
+  registry = "io.growing.dryad.consul.registry.ConsulServiceRegistry"
+
+  service {
+    http {
+      # 转发接口的预定义前缀，目前只支持一个预定义路径参数
+      prefix = "/v3/projects/:project_id"
+      port = 8080
+      pattern = "/.*"
+      check {
+        url = "/healthy-check"
+        interval = 5s
+      }
+    }
+  }
+
+  consul {
+    host = "ci-consul.infra.growingio.com"
+    port = 80
+    username = "liguobin"
+    password = "p6hMvxxmnitR"
+  }
 
 }
 ```

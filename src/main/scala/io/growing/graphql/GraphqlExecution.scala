@@ -15,19 +15,17 @@ import scala.concurrent.duration.Duration
  * @author liguobin@growingio.com
  * @version 1.0,2020/7/7
  */
-object GraphqlExecution extends App with LazyLogging{
+object GraphqlExecution extends App with LazyLogging {
 
   //因为有main方法，全局变量加载拿不到值，必须加lazy
-
   private lazy val json = MediaType.parse("application/json; charset=utf-8")
   private lazy val charset = "utf8"
 
   def executeRequest(request: GraphqlRequest): Future[String] = {
     val body = request.toString
-    logger.info(s"graphql request:\n $body")
-    val url = Config.getGraphqlUrl
-    val (authKey, authValue) = Config.getAuthHeader()
-    val rb = new Request.Builder().url(url).addHeader(authKey, authValue)
+    logger.info(s"graphql request: \n$body")
+    val url = request.getExecuteUrl
+    val rb = new Request.Builder().url(url).addHeader(request.getAuthToken._1, request.getAuthToken._2)
       .post(RequestBody.create(body, json))
     val promise = Promise[String]
 
@@ -42,7 +40,7 @@ object GraphqlExecution extends App with LazyLogging{
           val bytes = response.body().bytes()
           promise.success(new String(bytes, charset))
         } else {
-          val r: String = JacksonScalaSupport.mapper.writeValueAsString(response)
+          val r: String = JacksonScalaSupport.mapper.writeValueAsString(Map(response.code() -> response.message()))
           promise.failure(new Exception(r))
         }
       }
@@ -51,7 +49,7 @@ object GraphqlExecution extends App with LazyLogging{
   }
 
   override def main(args: Array[String]): Unit = {
-    val s = executeRequest(new GraphqlRequest(operationName = "insightDimensions", variables = Some(
+    val s = executeRequest(new GraphqlRequest(operationName = "insightDimensions", executeUrl = Config.getGraphqlUrl, variables = Some(
       """
         |   {
         |        "measurements":[
@@ -77,7 +75,7 @@ object GraphqlExecution extends App with LazyLogging{
         |  }
         |}
         |
-        |""".stripMargin))
+        |""".stripMargin, authToken = "Cookie" -> "token"))
     println(Await.result(s, Duration.Inf))
   }
 

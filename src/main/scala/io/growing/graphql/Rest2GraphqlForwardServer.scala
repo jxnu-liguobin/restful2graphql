@@ -28,7 +28,9 @@ object Rest2GraphqlForwardServer extends App {
 
   private val (host, port) = Config.getRestfulServerConfig()
   private[this] val serviceProvider = ServiceProvider()
-  private[this] val restUriPattern = Config.getRestUriPrefix() + "/:resource/([\\w]+)"
+  private[this] val prefixs = Config.getRestUriPrefix().tail.split("/")
+  private[this] val restUriPattern1 = "/" + Seq(prefixs(0), prefixs(1)).mkString("/") + "/([\\w]+)"
+  private[this] val restUriPattern2 = "/" + Seq(prefixs(0), prefixs(1)).mkString("/") + "/([\\w]+)/([\\w]+)"
   private[this] val authKey = Config.getAuthKey()
 
   private val responseJsonData: Future[String] => Route = (result: Future[String]) => onSuccess(result) { r => complete(HttpEntity(ContentTypes.`application/json`, r)) }
@@ -157,7 +159,7 @@ object Rest2GraphqlForwardServer extends App {
       |""".stripMargin)
 
   if (Config.enableServiceRegister()) {
-    Try(serviceProvider.register(Schema.HTTP -> Seq(restUriPattern))) match {
+    Try(serviceProvider.register(Schema.HTTP -> Seq(restUriPattern1, restUriPattern2))) match {
       case Success(_) =>
         println("Service register success")
       case Failure(exception) => println(s"Service register failure: ${exception.getLocalizedMessage}")

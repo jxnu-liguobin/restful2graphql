@@ -14,13 +14,13 @@ graphql-expand
 
 实际 URI 只有两种格式
 
-1. GET      /v3/projects/:project_id/:resource/:resource_id
-2. GET      /v3/projects/:project_id/:resources
-3. PUT      /v3/projects/:project_id/:resource/:resource_id             (requestBody)
-4. PUT      /v3/projects/:project_id/:resources             (requestBody 有id)
-5. POST     /v3/projects/:project_id/:resource             (requestBody)
-6. DELETE   /v3/projects/:project_id/:resource/:resource_id 
-7. DELETE   /v3/projects/:project_id/:resources          (requestBody)
+1. GET      /forward/projects/:project_id/:resource/:resource_id
+2. GET      /forward/projects/:project_id/:resources
+3. PUT      /forward/projects/:project_id/:resource/:resource_id             (requestBody)
+4. PUT      /forward/projects/:project_id/:resources             (requestBody 有id)
+5. POST     /forward/projects/:project_id/:resource             (requestBody)
+6. DELETE   /forward/projects/:project_id/:resource/:resource_id 
+7. DELETE   /forward/projects/:project_id/:resources          (requestBody)
 
 - resource => graphql field operationName
 - requestBody => graphql field variables
@@ -54,7 +54,7 @@ graphql-expand
 
 **注册实现**
 
-* 采用 dryad，仅注册一个 URI `/v3/projects/:project_id/:resource/([\w]+)`
+* 采用 dryad，仅注册两个 URI `/forawrd/projects/([\w]+), /forawrd/projects/([\w]+)/([\w]+)`
 
 ## 使用技术
 
@@ -95,9 +95,9 @@ graphql-expand
 
 **使用 restful 完成 crud**
 
-- GET http://localhost:8080/v3/projects/WlGk4Daj/userVariables 
+- GET http://localhost:8080/forward/projects/WlGk4Daj/userVariables 
     - 将会使用 HTTP 调用 graphql api: `userVariables: [UserVariable]`
-- POST http://localhost:8080/v3/projects/WlGk4Daj/userVariable 
+- POST http://localhost:8080/forward/projects/WlGk4Daj/userVariable 
     - 将会使用 HTTP 调用 graphql api: `createUserVariable(userVariable: VariableInput!): UserVariable!`
     - requestBody 
 ```json
@@ -127,9 +127,9 @@ graphql-expand
 ```
 对用户来说，query 的拼写是痛苦的。
 
-- DELETE http://localhost:8080/v3/projects/WlGk4Daj/userVariable/y9pmLdQm # y9pmLdQm是一个HashId
+- DELETE http://localhost:8080/forward/projects/WlGk4Daj/userVariable/y9pmLdQm # y9pmLdQm是一个HashId
     - 将会使用 HTTP 调用 graphql api: `deleteUserVariable(id: HashId!): Boolean!`
-- PUT http://localhost:8080/v3/projects/WlGk4Daj/userVariable/y9pmLdQm
+- PUT http://localhost:8080/forward/projects/WlGk4Daj/userVariable/y9pmLdQm
     - 将会使用 HTTP 调用 graphql api: `updateUserVariable(id: HashId!, userVariable: VariableInput!): UserVariable!`
     - requestBody 当 id 字段在路径参数和 requestBody 都存在时，只会使用路径参数的
 ```json
@@ -181,7 +181,7 @@ dryad {
   service {
     http {
       # 转发接口的预定义前缀，目前只支持一个预定义路径参数
-      prefix = "/v3/projects/:project_id"
+      prefix = "/forward/projects/:project_id"
       port = 8080
       pattern = "/.*"
       check {

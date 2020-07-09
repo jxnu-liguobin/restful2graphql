@@ -17,6 +17,7 @@ object Config {
   private val auth = "graphql.auth"
   private val restful = "dryad.service.http"
   private lazy val config = ConfigFactory.load(this.getClass.getClassLoader)
+  private val serviceRegistryEnable = "dryad.enabled"
 
   /**
    * 获取当前fetcher需要排除的字段，这是因为自动生成的gql，会使用所有字段
@@ -63,5 +64,15 @@ object Config {
    */
   def getRestUriPrefix(): String = {
     config.getConfig(restful).getString("prefix")
+  }
+
+  /**
+   * 是否开启restful api的服务注册
+   *
+   * @return
+   */
+  def enableServiceRegister(): Boolean = {
+    config.getBoolean(serviceRegistryEnable)
+
   }
 }

@@ -156,17 +156,23 @@ object Rest2GraphqlForwardServer extends App {
       |        \/           \/|__|        \/    |__|           \/                            \/           \/
       |""".stripMargin)
 
+  if (Config.enableServiceRegister()) {
+    Try(serviceProvider.register(Schema.HTTP -> Seq(restUriPattern))) match {
+      case Success(_) =>
+        println("Service register success")
+      case Failure(exception) => println(s"Service register failure: ${exception.getLocalizedMessage}")
+    }
+  } else {
+    println("disabled Service register")
 
-  Try(serviceProvider.register(Schema.HTTP -> Seq(restUriPattern))) match {
-    case Success(_) =>
-      println("Service register success")
-    case Failure(exception) => println(s"Service register failure: ${exception.getLocalizedMessage}")
   }
 
   StdIn.readLine() // let it run until user presses return
 
   bindingFuture.flatMap(_.unbind()).onComplete { _ =>
-    serviceProvider.deregister()
+    if (Config.enableServiceRegister()) {
+      serviceProvider.deregister()
+    }
     system.terminate()
   }
 }

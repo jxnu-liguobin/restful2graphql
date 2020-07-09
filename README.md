@@ -194,8 +194,8 @@ dryad {
   consul {
     host = "ci-consul.infra.growingio.com"
     port = 80
-    username = "liguobin"
-    password = "p6hMvxxmnitR"
+    username = "x"
+    password = "x"
   }
 
 }

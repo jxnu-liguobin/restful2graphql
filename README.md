@@ -180,11 +180,12 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 ```
 graphql {
 
-  #1.直接将schema放在里面，或者其他schema合并后放到这里面，不要与放在/gql目录，会被覆盖
-  #2.对应gqlg --schemaFilePath参数的值
+  #1.直接将 schema 放在里面，或者其他schema合并后放到这里面，不要与放在`src/main/resources/gql`目录，会被覆盖
+  #2.该路径对应 gqlg --schemaFilePath参数的值
   schema.path = "src/main/resources/all.graphql"
+  #3.`src/main/resources/gql`，该路径对应 gqlg --destDirPath 参数的值
+  gql.folder = "gql"
   exclude {
-
    # 因为定义的是必须存在，查出的数可能为空，不兼容，需要排除，对于嵌套逻辑只需要排除最外层
    # 之所以配置是这样的，是因为生成的 graphql query 就是空格隔开，这样不需要的字段，直接粘贴复制到这里即可
    userVariables = "projectId type valueType"

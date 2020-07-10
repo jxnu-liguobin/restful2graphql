@@ -131,7 +131,7 @@ object GraphqlScanner {
     //将我们独立的分离写法合并到all.graphql中
     val tmp = new File(Config.getSchemaPath())
     if (tmp.exists()) {
-      val query = new GraphqlQueryScanner(ClassPath.from(this.getClass.getClassLoader), "gql")
+      val query = new GraphqlQueryScanner(ClassPath.from(this.getClass.getClassLoader), Config.getGQLPath())
       query.scanQuery()
     } else {
       val schema = new GraphqlSchemaScanner(ClassPath.from(this.getClass.getClassLoader), "graphql")
@@ -142,7 +142,7 @@ object GraphqlScanner {
       bw.write("# create auto, do not edit it\n")
       bw.write(res)
       bw.flush()
-      val query = new GraphqlQueryScanner(ClassPath.from(this.getClass.getClassLoader), "gql")
+      val query = new GraphqlQueryScanner(ClassPath.from(this.getClass.getClassLoader), Config.getGQLPath())
       query.scanQuery()
     }
   }
@@ -162,7 +162,7 @@ object GraphqlScannerTest extends App {
   println(res)
 
 
-  val query = new GraphqlQueryScanner(ClassPath.from(this.getClass.getClassLoader), "gql")
+  val query = new GraphqlQueryScanner(ClassPath.from(this.getClass.getClassLoader), Config.getGQLPath())
   val ret = query.scanQuery()
   println(ret)
 }

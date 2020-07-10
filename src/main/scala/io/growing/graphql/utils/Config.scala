@@ -84,4 +84,13 @@ object Config {
   def getSchemaPath(): String = {
     Try(config.getString("schema.path")).getOrElse("src/main/resources/all.graphql")
   }
+
+  /**
+   * 获取gql生成的地址
+   *
+   * @return
+   */
+  def getGQLPath(): String = {
+    Try(config.getString("gql.folder")).getOrElse("gql")
+  }
 }

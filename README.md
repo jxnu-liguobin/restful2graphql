@@ -219,7 +219,7 @@ dryad {
 
   service {
     http {
-      # 转发接口的预定义前缀，目前只支持一个预定义路径参数
+      # 转发接口的预定义前缀，目前只支持：/forward/projects/:project_id和/forward/projects 两种路径，其中单词可以替换，分隔符数量不能改
       prefix = "/forward/projects/:project_id"
       port = 8080
       pattern = "/.*"

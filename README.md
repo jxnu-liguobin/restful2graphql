@@ -1,4 +1,4 @@
-graphql-expand
+restful2graphql
 --
 
 ## 概述

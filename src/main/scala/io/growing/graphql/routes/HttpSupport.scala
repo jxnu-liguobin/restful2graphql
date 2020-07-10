@@ -4,7 +4,8 @@ import akka.http.scaladsl.model.{ ContentTypes, HttpEntity }
 import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.server.{ Directives, PathMatcher1, Route }
 import akka.http.scaladsl.server.PathMatcher.Matched
-import io.growing.graphql.utils.{ Config, GraphqlScanner }
+import io.growing.graphql.parser.GraphqlParser
+import io.growing.graphql.Config
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -15,14 +16,14 @@ import scala.concurrent.{ ExecutionContext, Future }
  * @author liguobin@growingio.com
  * @version 1.0,2020/7/10
  */
-trait HttpSupport extends Directives with HttpRouter {
+trait HttpSupport extends Directives with HttpRouter with GraphqlParser {
 
   implicit val ec: ExecutionContext
 
   val responseJsonData: Future[String] => Route = (result: Future[String]) => onSuccess(result) { r => complete(HttpEntity(ContentTypes.`application/json`, r)) }
   val authKey = Config.getAuthKey()
 
-  implicit lazy val operationQueryMappings: Map[String, String] = GraphqlScanner.createOperationQueryMappings()
+  implicit lazy val operationQueryMappings: Map[String, String] = createOperationQueryMappings()
 
   object ResourceMatcher extends PathMatcher1[String] {
 

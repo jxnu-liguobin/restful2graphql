@@ -1,7 +1,7 @@
 package io.growing.graphql.request
 
 import com.typesafe.scalalogging.LazyLogging
-import io.growing.graphql.utils.Config
+import io.growing.graphql.Config
 
 /**
  * graphql 所需的三个参数

@@ -1,4 +1,4 @@
-package io.growing.graphql.utils
+package io.growing.graphql
 
 import java.util
 import java.util.concurrent.TimeUnit

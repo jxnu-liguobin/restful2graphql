@@ -1,4 +1,4 @@
-package io.growing.graphql.utils
+package io.growing.graphql
 
 import okhttp3.MediaType
 
@@ -13,6 +13,7 @@ object Constants {
   val json = MediaType.parse("application/json; charset=utf-8")
 
 
+  //常用请求头
   val XUserId = "X-User-Id"
   val XRequestId = "X-Request-Id"
   val XInnerUserId = "X-Inner-User-Id"

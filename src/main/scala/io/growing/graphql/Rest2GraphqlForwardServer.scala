@@ -7,7 +7,6 @@ import akka.stream.ActorMaterializer
 import io.growing.dryad.ServiceProvider
 import io.growing.dryad.portal.Schema
 import io.growing.graphql.routes.{ HealthyRouter, HttpForwardRouter }
-import io.growing.graphql.utils.Config
 
 import scala.concurrent.Future
 import scala.io.StdIn
@@ -15,7 +14,7 @@ import scala.util.{ Failure, Success, Try }
 
 /**
  * 1.使用akkahttp转发请求
- * 2.使用akkahttp接收请求并调用本地graphql
+ * 2.调用本地graphql时不需要此server
  *
  * @author liguobin@growingio.com
  * @version 1.0,2020/7/7

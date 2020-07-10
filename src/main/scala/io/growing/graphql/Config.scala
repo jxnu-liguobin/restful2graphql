@@ -1,4 +1,4 @@
-package io.growing.graphql.utils
+package io.growing.graphql
 
 import com.typesafe.config.ConfigFactory
 import org.apache.commons.lang3.StringUtils
@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils
 import scala.util.Try
 
 /**
+ * 读取配置
  *
  * @author liguobin@growingio.com
  * @version 1.0,2020/7/7

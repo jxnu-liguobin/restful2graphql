@@ -1,4 +1,4 @@
-name := "graphql-expand-scala"
+name := "restful2graphql"
 
 version := "0.1"
 

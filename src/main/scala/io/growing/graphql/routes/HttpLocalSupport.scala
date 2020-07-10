@@ -6,7 +6,6 @@ import akka.http.scaladsl.server.Route
 import com.google.common.net.HttpHeaders
 import io.growing.graphql.Rest2GraphqlForwardServer.executeRequest
 import io.growing.graphql.request.RestRequest
-import io.growing.graphql.utils.{ Config, Constants }
 
 import scala.concurrent.Future
 
@@ -18,9 +17,12 @@ import scala.concurrent.Future
  */
 trait HttpLocalSupport extends HttpSupport {
 
+  import io.growing.graphql.Config
+
   private[this] val authKey = Config.getAuthKey()
 
   def executeRequestWithHeaders(route: Future[String] => Route, r: RestRequest)(implicit operationQueryMappings: Map[String, String]): Route = {
+    import io.growing.graphql.Constants
     optionalHeaderValueByName(Constants.XUserId) { xUserId =>
       headerValueByName(authKey) { authValue =>
         optionalHeaderValueByName(Constants.XRequestId) { XRequestId =>

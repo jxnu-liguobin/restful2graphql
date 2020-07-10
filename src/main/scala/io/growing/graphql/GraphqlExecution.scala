@@ -8,7 +8,6 @@ import com.typesafe.scalalogging.LazyLogging
 import graphql.{ ExecutionInput, ExecutionResult, GraphQL, GraphQLContext }
 import graphql.execution.ExecutionId
 import io.growing.graphql.request.GraphqlRequest
-import io.growing.graphql.utils.{ Constants, OkHttp }
 import okhttp3._
 
 import scala.concurrent.{ ExecutionContext, Future, Promise }

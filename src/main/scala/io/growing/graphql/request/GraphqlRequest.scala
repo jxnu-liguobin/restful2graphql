@@ -1,5 +1,8 @@
 package io.growing.graphql.request
 
+import com.typesafe.scalalogging.LazyLogging
+import io.growing.graphql.utils.Config
+
 /**
  * graphql 所需的三个参数
  *
@@ -8,14 +11,50 @@ package io.growing.graphql.request
  * @param operationName graphql操作名称，一般对应一个内部fetcher，实际上可为空，这里使用这个转发请求，不能为空
  * @param variables     graphql请求的请求体，参数，json格式
  * @param query         graphql请求语句，难点
- * @param authToken     graphql授权
+ * @param contextParams restful带过来的参数 上下文参数传递
  */
-class GraphqlRequest(operationName: String, variables: Option[String] = None, query: String, executeUrl: String, authToken: (String, String)) extends Request {
+class GraphqlRequest(operationName: String, variables: Option[String] = None, query: String,
+  contextParams: Map[String, Object] = Map.empty) extends Request with LazyLogging {
 
-  def getExecuteUrl: String = executeUrl
+  private[this] val configUrl = Config.getGraphqlUrl
+  private[this] val authKey = Config.getAuthKey()
 
-  def getAuthToken: (String, String) = authToken
+  /**
+   * 获取授权的token
+   *
+   * @return
+   */
+  def getAuthToken(): (String, String) = {
+    logger.info(s"build auth token: \n ${authKey -> contextParams(authKey)}")
+    authKey -> contextParams(authKey).toString
+  }
 
+  /**
+   * 获取所有请求过来的参数，目前主要是路径参数
+   *
+   * @return
+   */
+  def getContextParams: Map[String, Object] = contextParams
+
+  /**
+   * 获取graphql查询语句
+   *
+   * @return
+   */
+  def getQuery(): String = query.replace("\n", "").trim
+
+  /**
+   * 获取graphql的参数
+   *
+   * @return
+   */
+  def getVariables(): String = variables.getOrElse("{}")
+
+  /**
+   * 生成graphql调用的body
+   *
+   * @return
+   */
   override def toString: String = {
     s"""
        |{
@@ -24,5 +63,21 @@ class GraphqlRequest(operationName: String, variables: Option[String] = None, qu
        |  "query": "${query.replace("\n", "").trim}"
        |}
        |""".stripMargin
+  }
+
+  /**
+   * 对于URL存在%s，使用项目id进行替换，得到新的graphql URL
+   *
+   * @return
+   */
+  def getExecuteUrl(): String = {
+    val executeUrl = if (contextParams.nonEmpty && configUrl.contains("%s") && contextParams.contains("projectId")) {
+      configUrl.format(contextParams("projectId"))
+    } else {
+      configUrl
+    }
+
+    logger.info(s"build graphql url: \n $executeUrl")
+    executeUrl
   }
 }

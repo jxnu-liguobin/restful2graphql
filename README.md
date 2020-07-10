@@ -148,16 +148,22 @@ graphql-expand
 ```
 graphql {
 
+  #1.直接将schema放在里面，或者其他schema合并后放到这里面，不要与 *.gql 在同目录，会被覆盖
+  schema.path = "src/main/resources/all.graphql"
   exclude {
 
    # 因为定义的是必须存在，查出的数可能为空，不兼容，需要排除，对于嵌套逻辑只需要排除最外层
-   userVariables = ["projectId", "type", "valueType"]
-   updateSegment = ["projectId", "description", "compute", "scheduler", "creatorId","createdAt","updaterId","updatedAt","creator","updater", "createdBy","detector"]
-   createSegment = ["projectId", "description", "compute", "scheduler", "creatorId","createdAt","updaterId","updatedAt","creator","updater", "createdBy","detector"]
+   # 之所以配置是这样的，是因为生成的 graphql query 就是空格隔开，这样不需要的字段，直接粘贴复制到这里即可
+   userVariables = "projectId type valueType"
+   createUserVariable = "id projectId key type description isSystem creatorId createdAt updaterId updatedAt creator updater valueType "
+   updateSegment = "projectId description compute scheduler creatorId createdAt updaterId updatedAt creator updater createdBy detector"
+   createSegment = "projectId description compute scheduler creatorId createdAt updaterId updatedAt creator updater createdBy detector"
   }
 
   # graphql服务的地址
   # url = "http://localhost:8086/projects/%s/graphql"
+
+  # 此地址的 graphql 请求是经过 gateway 的
   url = "http://gdp-dev.growingio.com/graphql"
 
   # graphql鉴权请求头的key，应该在 restful 请求时携带服务器的InternalToken，这里默认使用 cookie （可以使用 token 或者 cookie）
@@ -170,7 +176,7 @@ graphql {
 # dryad框架的参数
 dryad {
 
-  enabled = true
+  enabled = false
 
   namespace = "gio-graphql-forawrd"
   group = "k8s-datatest"

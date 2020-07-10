@@ -97,13 +97,13 @@ class GraphqlQueryScanner(classPath: ClassPath, root: String) {
               if (q.contains("}")) {
                 countRight += 1
               }
-              if(countLeft >= countRight) "" else q
+              if (countLeft >= countRight) "" else q
             } else {
               q
             }
         }
       } else query
-      operations.put(key, neqQuery.mkString("\n"))
+      operations.put(key, neqQuery.filter(f => StringUtils.isNoneBlank(f)).mkString("\n"))
       query
     }.toSeq
 
@@ -129,7 +129,7 @@ object GraphqlScanner {
    */
   def createOperationQueryMappings(): Map[String, String] = {
     //将我们独立的分离写法合并到all.graphql中
-    val tmp = new File("src/main/resources/all.graphql")
+    val tmp = new File(Config.getSchemaPath())
     if (tmp.exists()) {
       val query = new GraphqlQueryScanner(ClassPath.from(this.getClass.getClassLoader), "gql")
       query.scanQuery()
@@ -152,7 +152,7 @@ object GraphqlScannerTest extends App {
 
   val schema = new GraphqlSchemaScanner(ClassPath.from(this.getClass.getClassLoader), "graphql")
   val res = schema.scanSchema()
-  val file = new File("src/main/resources/all.graphql")
+  val file = new File(Config.getSchemaPath())
   if (!file.exists) file.createNewFile
   val fw = new FileWriter(file.getAbsoluteFile)
   val bw = new BufferedWriter(fw)

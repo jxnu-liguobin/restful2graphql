@@ -1,8 +1,8 @@
 package io.growing.graphql.utils
 
 import com.typesafe.config.ConfigFactory
+import org.apache.commons.lang3.StringUtils
 
-import scala.collection.JavaConverters._
 import scala.util.Try
 
 /**
@@ -26,7 +26,8 @@ object Config {
    * @return
    */
   def getExcludeFields(operationName: String): List[String] = {
-    Try(config.getConfig(exclude).getList(operationName).unwrapped().asScala.map(_.toString).toList).getOrElse(List.empty[String])
+    val excludes = Try(config.getConfig(exclude).getString(operationName).trim.split(" ").toList.filter(f => StringUtils.isNotBlank(f))).getOrElse(List())
+    excludes
   }
 
   /**
@@ -73,6 +74,14 @@ object Config {
    */
   def enableServiceRegister(): Boolean = {
     config.getBoolean(serviceRegistryEnable)
+  }
 
+  /**
+   * 获取所有schema存放的位置或合并后的schema存放的位置
+   *
+   * @return
+   */
+  def getSchemaPath(): String = {
+    Try(config.getString("schema.path")).getOrElse("src/main/resources/all.graphql")
   }
 }

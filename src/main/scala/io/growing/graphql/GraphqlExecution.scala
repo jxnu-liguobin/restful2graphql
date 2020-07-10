@@ -1,32 +1,35 @@
 package io.growing.graphql
 
 import java.io.IOException
+import java.util.{ Objects, UUID }
 
+import com.google.gson.GsonBuilder
 import com.typesafe.scalalogging.LazyLogging
+import graphql.{ ExecutionInput, ExecutionResult, GraphQL, GraphQLContext }
+import graphql.execution.ExecutionId
 import io.growing.graphql.request.GraphqlRequest
-import io.growing.graphql.utils.{ Config, JacksonScalaSupport, OkHttp }
+import io.growing.graphql.utils.{ Constants, OkHttp }
 import okhttp3._
 
-import scala.concurrent.{ Await, Future, Promise }
-import scala.concurrent.duration.Duration
+import scala.concurrent.{ ExecutionContext, Future, Promise }
 
 /**
+ * graphql执行器，包括远程和本地
  *
  * @author liguobin@growingio.com
  * @version 1.0,2020/7/7
  */
-object GraphqlExecution extends App with LazyLogging {
+trait GraphqlExecution extends LazyLogging {
 
   //因为有main方法，全局变量加载拿不到值，必须加lazy
-  private lazy val json = MediaType.parse("application/json; charset=utf-8")
-  private lazy val charset = "utf8"
+  private[this] lazy val gson = new GsonBuilder().serializeNulls().create()
 
   def executeRequest(request: GraphqlRequest): Future[String] = {
     val body = request.toString
     logger.info(s"graphql request: \n$body")
-    val url = request.getExecuteUrl
-    val rb = new Request.Builder().url(url).addHeader(request.getAuthToken._1, request.getAuthToken._2)
-      .post(RequestBody.create(body, json))
+    val url = request.getExecuteUrl()
+    val rb = new Request.Builder().url(url).addHeader(request.getAuthToken()._1, request.getAuthToken()._2)
+      .post(RequestBody.create(body, Constants.json))
     val promise = Promise[String]
 
     OkHttp.client.newCall(rb.build()).enqueue(new Callback {
@@ -38,9 +41,9 @@ object GraphqlExecution extends App with LazyLogging {
       override def onResponse(call: Call, response: Response): Unit = {
         if (response.isSuccessful) {
           val bytes = response.body().bytes()
-          promise.success(new String(bytes, charset))
+          promise.success(new String(bytes, Constants.charset))
         } else {
-          val r: String = JacksonScalaSupport.mapper.writeValueAsString(Map(response.code() -> response.message()))
+          val r: String = gson.toJson(Map(response.code() -> response.message()))
           promise.failure(new Exception(r))
         }
       }
@@ -48,35 +51,47 @@ object GraphqlExecution extends App with LazyLogging {
     promise.future
   }
 
-  override def main(args: Array[String]): Unit = {
-    val s = executeRequest(new GraphqlRequest(operationName = "insightDimensions", executeUrl = Config.getGraphqlUrl, variables = Some(
-      """
-        |   {
-        |        "measurements":[
-        |            {
-        |                "id":"evp9kDOx",
-        |                "type":"custom",
-        |                "attribute":""
-        |            }
-        |        ],
-        |        "timeRange":"abs:1593446400000,1593532799999"
-        |    }
-        |""".stripMargin), query =
-      """
-        |  query ($measurements: [MeasurementInput]) {
-        |  insightDimensions(measurements: $measurements) {
-        |    id
-        |    name
-        |    groupId
-        |    groupName
-        |    type
-        |    valueType
-        |    __typename
-        |  }
-        |}
-        |
-        |""".stripMargin, authToken = "Cookie" -> "token"))
-    println(Await.result(s, Duration.Inf))
+  //未测试
+  @unchecked
+  private def buildExecution(request: GraphqlRequest): ExecutionInput = {
+    val context = GraphQLContext.newContext()
+    //将request中的参数都放在execution中传递
+    for ((k, v) <- request.getContextParams) {
+      context.of(k, v)
+    }
+    val execution = ExecutionInput.newExecutionInput(request.toString).context(context)
+    val executionId = UUID.randomUUID().getLeastSignificantBits.toHexString
+    execution.executionId(ExecutionId.from(executionId))
+    val varargs = gson.fromJson(request.getVariables(), classOf[java.util.Map[String, Object]])
+    if (Objects.nonNull(varargs)) {
+      execution.variables(varargs)
+    }
+    execution.build()
+  }
+
+
+  /**
+   * 以jar形式引入依赖，执行本地的graphql，而不是使用转发
+   *
+   * @param graphQL
+   * @param request
+   * @param ec
+   * @return
+   */
+  //未测试
+  @unchecked
+  def executeLocal(graphQL: GraphQL, request: GraphqlRequest)(implicit ec: ExecutionContext): Future[String] = {
+    val execution = buildExecution(request)
+    val future = graphQL.executeAsync(execution)
+    val promise = Promise[ExecutionResult]
+    future.whenComplete((t: ExecutionResult, u: Throwable) ⇒ {
+      if (Objects.nonNull(u)) {
+        promise.failure(u)
+      } else {
+        promise.success(t)
+      }
+    })
+    promise.future.map(r => gson.toJson(r))
   }
 
 }

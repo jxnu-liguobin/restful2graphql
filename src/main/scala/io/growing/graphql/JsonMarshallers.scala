@@ -1,4 +1,4 @@
-package io.growing.graphql.utils
+package io.growing.graphql
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json.{ DefaultJsonProtocol, JsonFormat, JsString, JsValue }
@@ -9,7 +9,7 @@ import spray.json.{ DefaultJsonProtocol, JsonFormat, JsString, JsValue }
  * @author liguobin@growingio.com
  * @version 1.0,2020/7/8
  */
-object JsonMarshallers extends DefaultJsonProtocol with SprayJsonSupport {
+trait JsonMarshallers extends DefaultJsonProtocol with SprayJsonSupport {
 
   implicit val stringParser = new JsonFormat[String] {
 

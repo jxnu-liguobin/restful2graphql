@@ -114,9 +114,8 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 首先利用前端代码生成 graphql query 语句，每个 gql 对应服务端的一个 data fetcher 
 
 - 使用 https://github.com/timqian/gql-generator 前端工具，自动生成 gql。
-- 执行 gqlg --schemaFilePath src/main/resources/all.graphql --destDirPath src/main/resources/gql --depthLimit 5
-
-在 all.graphql 中是所有需要转发的 graphql schmea。最终会在 gql/ 目录下生成所有 *.gql 语句。
+    - 执行 gqlg --schemaFilePath src/main/resources/all.graphql --destDirPath src/main/resources/gql --depthLimit 5
+    - 在 all.graphql 中是所有需要转发的 graphql schema。最终会在 gql/ 目录下生成所有 *.gql 语句
 
 > 这里自动生成的语句实际会有很多的多余字段，需要排除掉，可以在application.conf中配置
 

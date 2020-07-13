@@ -65,8 +65,8 @@ restful2graphql
 
 无论是第一种和第二种，需要关注如何将 restful 的接口对应到 graphql 接口上。
 
-我们知道，在 graphql 中只有一个请求URI，而 restful 是每个资源一个以上，且使用 HTTP 方法代表资源的操作。
-fetcher name = 操作+资源，如创建用户变量：createUserVariable，查询所有用户变量：userVariables，删除用户变量：deleteUserVariable
+我们知道，在 graphql 中只有一个请求URI，而 restful 是每个资源都有一个以上的路径，且使用 HTTP 方法代表资源的操作。
+fetcher name = 操作+资源，如创建用户变量：createUserVariable，查询所有用户变量：userVariables（查询比较特殊，前缀没有拼接操作），删除用户变量：deleteUserVariable
 
 约定对应关系如下：
 针对通用 restful 接口，其中 requestBody 是可选，每个资源有以下八个独立接口，分四种HTTP方法类型：
@@ -88,7 +88,7 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 8. 批量删除 DELETE   /forward/projects/:project_id/:resources                                (requestBody都是id)
 
 - resource => graphql field operationName
-    - 就是fetcher方法定义去掉get/update/delete/create等前缀，再把首字符转为小写，因为前缀已经由restful HTTP方法来表示
+    - 就是 fetcher 方法定义去掉 update/delete/create 等前缀，再把首字符转为小写，因为前缀已经由 restful HTTP 方法来表示
 - requestBody => graphql field variables
 - resource_id => graphql fetcher param 
 
@@ -188,9 +188,10 @@ graphql {
    # 因为定义的是必须存在，查出的数可能为空，不兼容，需要排除，对于嵌套逻辑只需要排除最外层
    # 之所以配置是这样的，是因为生成的 graphql query 就是空格隔开，这样不需要的字段，直接粘贴复制到这里即可
    userVariables = "projectId type valueType"
+   userVariable = "projectId type valueType"
    createUserVariable = "id projectId key type description isSystem creatorId createdAt updaterId updatedAt creator updater valueType "
-   updateSegment = "projectId description compute scheduler creatorId createdAt updaterId updatedAt creator updater createdBy detector"
-   createSegment = "projectId description compute scheduler creatorId createdAt updaterId updatedAt creator updater createdBy detector"
+   updateUserVariable = "id projectId key type description isSystem creatorId createdAt updaterId updatedAt creator updater valueType "
+   deleteUserVariable = "id projectId key type description isSystem creatorId createdAt updaterId updatedAt creator updater valueType "
   }
 
   # graphql服务的地址

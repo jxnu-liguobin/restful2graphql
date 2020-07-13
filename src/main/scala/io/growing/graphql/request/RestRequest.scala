@@ -11,7 +11,7 @@ import spray.json.{ JsObject, JsString, JsValue }
  * @author liguobin@growingio.com
  * @version 1.0,2020/7/6
  * @param restOperation 通过方法和relativeUri获取crud的operationName
- * @param resource      指的是/rest/:resource/:resource_id中的resource
+ * @param resource      指的是/xx/:resource/:resource_id中的resource
  * @param contextParams 查询参数，携带项目id，授权的token键值对，类似执行上下文
  * @param requestBody   请求体，格式与使用graphql一样，目前不处理请求体和响应体
  * @param isBatch       查询和删除需要区分批量
@@ -56,7 +56,11 @@ case class RestRequest(restOperation: RestOperation, resource: String, contextPa
       case RestOperation.CREATE => restOperation.toString + resource.capitalize
       case RestOperation.DELETE if isBatch => "batch" + restOperation.toString.capitalize + resource.capitalize
       case RestOperation.DELETE => restOperation.toString + resource.capitalize
-      case RestOperation.GET if isBatch => resource
+      // 与graphql定义相同，查询所有资源时，有可能结尾是s，取决于graphql的schema定义
+      // 一般查询不会在schema的fetcher名称前面加get，所以 getOne getAll getList应该是一个路径，如：
+      // getOne: userVariable
+      // getAll: userVariables
+      // getList: userVariables + requestBody
       case RestOperation.GET => resource
       case RestOperation.UPDATE if isBatch => "batch" + restOperation.toString.capitalize + resource.capitalize
       case RestOperation.UPDATE => restOperation.toString + resource.capitalize

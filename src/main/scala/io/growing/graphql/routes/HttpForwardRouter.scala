@@ -3,6 +3,7 @@ package io.growing.graphql.routes
 import akka.http.scaladsl.server.Route
 import io.growing.graphql.{ GraphqlExecution, RestOperation }
 import io.growing.graphql.request.RestRequest
+import io.growing.graphql.RestOperation.RestOperation
 import spray.json.JsValue
 
 import scala.concurrent.ExecutionContext
@@ -17,64 +18,70 @@ trait HttpForwardRouter extends HttpSupport with GraphqlExecution {
 
   override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
+  private[this] def buildRestRequest(restOperation: RestOperation)(projectId: Option[String], typ: String, id: Option[String], authValue: String,
+    requestBody: Option[JsValue] = None, isBatch: Boolean = false): RestRequest = {
+    val auth = Map(authKey -> authValue)
+    val requireParams = id.fold(auth)(i => auth ++ Map("id" -> i))
+    RestRequest(restOperation = restOperation,
+      resource = typ,
+      contextParams = projectId.fold(requireParams)(pid => requireParams ++ Map("projectId" -> pid)),
+      requestBody = requestBody,
+      isBatch = isBatch)
+  }
+
   override def route: Route = {
     path(ProjectMatcher.getRestUriPathMather / ResourceMatcher / ResourceIdMatcher) { (projectId, typ, id) =>
+      // URI    /forward/projects/:project_id/:resource/:resource_id
       concat(
         get {
           headerValueByName(authKey) { authValue =>
-            //查询一个
-            val req = RestRequest(restOperation = RestOperation.GET, resource = typ,
-              contextParams = projectId.fold(Map("id" -> id))(pid => Map("id" -> id, "projectId" -> pid, authKey -> authValue)))
+            val req = buildRestRequest(RestOperation.GET)(projectId, typ, Some(id), authValue)
             val ret = executeRequest(req.toGraphqlRequest())
-            responseJsonData(ret)
+            resultJson(ret)
           }
         }
           ~ delete {
           headerValueByName(authKey) { authValue =>
-            //删除一个
-            val req = RestRequest(restOperation = RestOperation.DELETE, resource = typ,
-              contextParams = projectId.fold(Map("id" -> id))(pid => Map("id" -> id, "projectId" -> pid, authKey -> authValue)))
+            val req = buildRestRequest(RestOperation.DELETE)(projectId, typ, Some(id), authValue)
             val ret = executeRequest(req.toGraphqlRequest())
-            responseJsonData(ret)
+            resultJson(ret)
           }
         }
           ~ put {
           headerValueByName(authKey) { authValue =>
-            //更新
             decodeRequest {
               entity(as[JsValue]) { requestBody =>
-                //需要组合requestBody和queryParams
-                val req = RestRequest(restOperation = RestOperation.UPDATE, requestBody = Some(requestBody),
-                  resource = typ, contextParams = projectId.fold(Map("id" -> id))(pid => Map("id" -> id, "projectId" -> pid, authKey -> authValue)))
+                val req = buildRestRequest(RestOperation.UPDATE)(projectId, typ, Some(id), authValue, Some(requestBody))
                 val ret = executeRequest(req.toGraphqlRequest())
-                responseJsonData(ret)
+                resultJson(ret)
               }
             }
           }
         }
       )
     } ~
+      // URI    /forward/projects/:project_id/:resources
       path(ProjectMatcher.getRestUriPathMather / ResourceMatcher) { (projectId, typ) =>
         concat(
           get {
             headerValueByName(authKey) { authValue =>
-              //查询所有资源的列表
-              val req = RestRequest(restOperation = RestOperation.GET, resource = typ,
-                contextParams = projectId.fold(Map.empty[String, String])(pid => Map("projectId" -> pid, authKey -> authValue)))
-              val ret = executeRequest(req.toGraphqlRequest())
-              responseJsonData(ret)
+              decodeRequest {
+                entity(as[JsValue]) { requestBody =>
+                  val req = buildRestRequest(RestOperation.GET)(projectId, typ, None, authValue, Some(requestBody))
+                  val ret = executeRequest(req.toGraphqlRequest())
+                  resultJson(ret)
+                }
+              }
             }
           }
             ~
             post {
               headerValueByName(authKey) { authValue =>
-                //创建
                 decodeRequest {
                   entity(as[JsValue]) { requestBody =>
-                    val req = RestRequest(restOperation = RestOperation.CREATE, requestBody = Some(requestBody),
-                      resource = typ, contextParams = projectId.fold(Map.empty[String, String])(pid => Map("projectId" -> pid, authKey -> authValue)))
+                    val req = buildRestRequest(RestOperation.CREATE)(projectId, typ, None, authValue, Some(requestBody))
                     val ret = executeRequest(req.toGraphqlRequest())
-                    responseJsonData(ret)
+                    resultJson(ret)
 
                   }
                 }
@@ -82,14 +89,12 @@ trait HttpForwardRouter extends HttpSupport with GraphqlExecution {
             }
             ~
             delete {
-              //批量删除
               headerValueByName(authKey) { authValue =>
                 decodeRequest {
                   entity(as[JsValue]) { requestBody =>
-                    val req = RestRequest(restOperation = RestOperation.DELETE, requestBody = Some(requestBody),
-                      resource = typ, contextParams = projectId.fold(Map.empty[String, String])(pid => Map("projectId" -> pid, authKey -> authValue)), isBatch = true)
+                    val req = buildRestRequest(RestOperation.DELETE)(projectId, typ, None, authValue, Some(requestBody), isBatch = true)
                     val ret = executeRequest(req.toGraphqlRequest())
-                    responseJsonData(ret)
+                    resultJson(ret)
 
                   }
                 }
@@ -97,15 +102,12 @@ trait HttpForwardRouter extends HttpSupport with GraphqlExecution {
             }
             ~
             put {
-              //批量更新
               headerValueByName(authKey) { authValue =>
                 decodeRequest {
                   entity(as[JsValue]) { requestBody =>
-                    val req = RestRequest(restOperation = RestOperation.UPDATE, requestBody = Some(requestBody),
-                      resource = typ, contextParams = projectId.fold(Map.empty[String, String])(pid => Map("projectId" -> pid, authKey -> authValue)), isBatch = true)
+                    val req = buildRestRequest(RestOperation.UPDATE)(projectId, typ, None, authValue, Some(requestBody), isBatch = true)
                     val ret = executeRequest(req.toGraphqlRequest())
-                    responseJsonData(ret)
-
+                    resultJson(ret)
                   }
                 }
               }

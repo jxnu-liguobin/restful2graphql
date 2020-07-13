@@ -20,7 +20,7 @@ trait HttpSupport extends Directives with HttpRouter with GraphqlParser {
 
   implicit val ec: ExecutionContext
 
-  val responseJsonData: Future[String] => Route = (result: Future[String]) => onSuccess(result) { r => complete(HttpEntity(ContentTypes.`application/json`, r)) }
+  val resultJson: Future[String] => Route = (result: Future[String]) => onSuccess(result) { r => complete(HttpEntity(ContentTypes.`application/json`, r)) }
   val authKey = Config.getAuthKey()
 
   implicit lazy val operationQueryMappings: Map[String, String] = createOperationQueryMappings()

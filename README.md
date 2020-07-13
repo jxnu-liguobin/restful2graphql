@@ -10,7 +10,7 @@ restful2graphql
 
 将 restful API 转发到 graphql API，大致分为两种方案
 * 利用中间服务转发
-* 在 graphql api 的原服务上，提供一个 restful 接口，负责处理请求，并调用本地的 graphql
+* 不转发，通过转换请求，直接调用 graphql
 
 ## 方案比较
 
@@ -47,7 +47,8 @@ restful2graphql
 **缺点**
 
 * 对每个需要转发的服务，都需要额外编码
-* 新增两个 restful api 接口请求，并调用 graphql.executeAsync
+    - 新增两个 restful api 接口请求，并调用 graphql.executeAsync
+    - 对不同的web框架需要重新编写接收请求的控制器
 
 难点：
 
@@ -68,17 +69,23 @@ restful2graphql
 fetcher name = 操作+资源，如创建用户变量：createUserVariable，查询所有用户变量：userVariables，删除用户变量：deleteUserVariable
 
 约定对应关系如下：
-针对通用 restful 接口，其中 requestBody 是可选，每个资源有以下七个独立接口，分四种HTTP方法类型：
+针对通用 restful 接口，其中 requestBody 是可选，每个资源有以下八个独立接口，分四种HTTP方法类型：
+
+> 与 mutation 不同，一般 query 定义不会在 schema 的 fetcher 名称前面加 get，所以 getOne getAll getList 应该是一个路径，如：
+> getOne: userVariable
+> getAll: userVariables
+> getList: userVariables + requestBody
 
 实际 URI 只有两种格式
 
-1. GET      /forward/projects/:project_id/:resource/:resource_id
-2. GET      /forward/projects/:project_id/:resources
-3. PUT      /forward/projects/:project_id/:resource/:resource_id             (requestBody)
-4. PUT      /forward/projects/:project_id/:resources             (requestBody 有id)
-5. POST     /forward/projects/:project_id/:resource             (requestBody)
-6. DELETE   /forward/projects/:project_id/:resource/:resource_id 
-7. DELETE   /forward/projects/:project_id/:resources          (requestBody)
+1. 查询一个 GET      /forward/projects/:project_id/:resource/:resource_id
+2. 查询所有 GET      /forward/projects/:project_id/:resources
+3. 批量查询 GET      /forward/projects/:project_id/:resources                                (requestBody)
+4. 更新一个 PUT      /forward/projects/:project_id/:resource/:resource_id                    (requestBody)
+5. 批量更新 PUT      /forward/projects/:project_id/:resources                                (requestBody 有id)
+6. 创建一个 POST     /forward/projects/:project_id/:resource                                 (requestBody)
+7. 删除一个 DELETE   /forward/projects/:project_id/:resource/:resource_id 
+8. 批量删除 DELETE   /forward/projects/:project_id/:resources                                (requestBody都是id)
 
 - resource => graphql field operationName
     - 就是fetcher方法定义去掉get/update/delete/create等前缀，再把首字符转为小写，因为前缀已经由restful HTTP方法来表示
@@ -99,14 +106,6 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 * 采用 dryad，仅注册两个 URI `/forawrd/projects/([\w]+), /forawrd/projects/([\w]+)/([\w]+)`
 
 目前只支持，标准 result api 的 crud 转发到 graphql 的 mutation 和 query 
-
-1. 查询一个
-2. 查询所有
-3. 更新
-4. 创建
-5. 删除
-6. 批量删除
-7. 批量更新
 
 第二种方案提供了 trait 封装，但没有提供接口，也没有测试。
 

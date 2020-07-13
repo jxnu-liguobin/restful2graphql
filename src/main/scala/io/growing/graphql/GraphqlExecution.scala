@@ -9,6 +9,7 @@ import graphql.{ ExecutionInput, ExecutionResult, GraphQL, GraphQLContext }
 import graphql.execution.ExecutionId
 import io.growing.graphql.request.GraphqlRequest
 import okhttp3._
+import spray.json.{ JsNumber, JsObject, JsString }
 
 import scala.concurrent.{ ExecutionContext, Future, Promise }
 
@@ -42,8 +43,10 @@ trait GraphqlExecution extends LazyLogging {
           val bytes = response.body().bytes()
           promise.success(new String(bytes, Constants.charset))
         } else {
-          val r: String = gson.toJson(Map(response.code() -> response.message()))
-          promise.failure(new Exception(r))
+          logger.error(response.toString)
+          //将错误信息返回
+          val error = JsObject.apply(Map("code" -> JsNumber(response.code()), "message" -> JsString(response.message())))
+          promise.success(error.prettyPrint)
         }
       }
     })

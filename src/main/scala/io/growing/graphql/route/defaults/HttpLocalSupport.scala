@@ -1,12 +1,11 @@
-package io.growing.graphql.routes
+package io.growing.graphql.route.defaults
 
 import java.util.Locale
 
 import akka.http.scaladsl.server.Route
 import com.google.common.net.HttpHeaders
-import io.growing.graphql.Rest2GraphqlForwardServer.executeRequest
+import io.growing.graphql.{ Config, Constants, GraphqlExecution }
 import io.growing.graphql.request.RestRequest
-import io.growing.graphql.{ Config, Constants }
 
 import scala.concurrent.Future
 
@@ -16,7 +15,7 @@ import scala.concurrent.Future
  * @author liguobin@growingio.com
  * @version 1.0,2020/7/10
  */
-trait HttpLocalSupport extends HttpSupport {
+trait HttpLocalSupport extends HttpSupport with GraphqlExecution {
 
   private[this] val authKey = Config.getAuthKey()
 

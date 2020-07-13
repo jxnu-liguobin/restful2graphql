@@ -1,4 +1,4 @@
-package io.growing.graphql.routes
+package io.growing.graphql.route.defaults
 
 import akka.http.scaladsl.server.Route
 import io.growing.graphql.{ GraphqlExecution, RestOperation }

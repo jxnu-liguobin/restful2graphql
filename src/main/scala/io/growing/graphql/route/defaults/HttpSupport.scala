@@ -1,4 +1,4 @@
-package io.growing.graphql.routes
+package io.growing.graphql.route.defaults
 
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity }
 import akka.http.scaladsl.model.Uri.Path

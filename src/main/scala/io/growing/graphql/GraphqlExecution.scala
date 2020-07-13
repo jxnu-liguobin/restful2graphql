@@ -3,7 +3,6 @@ package io.growing.graphql
 import java.io.IOException
 import java.util.{ Objects, UUID }
 
-import com.google.gson.GsonBuilder
 import com.typesafe.scalalogging.LazyLogging
 import graphql.{ ExecutionInput, ExecutionResult, GraphQL, GraphQLContext }
 import graphql.execution.ExecutionId
@@ -20,9 +19,6 @@ import scala.concurrent.{ ExecutionContext, Future, Promise }
  * @version 1.0,2020/7/7
  */
 trait GraphqlExecution extends LazyLogging {
-
-  //因为有main方法，全局变量加载拿不到值，必须加lazy
-  private[this] lazy val gson = new GsonBuilder().serializeNulls().create()
 
   def executeRequest(request: GraphqlRequest): Future[String] = {
     val body = request.toString
@@ -41,7 +37,7 @@ trait GraphqlExecution extends LazyLogging {
       override def onResponse(call: Call, response: Response): Unit = {
         if (response.isSuccessful) {
           val bytes = response.body().bytes()
-          promise.success(new String(bytes, Constants.charset))
+          promise.success(new String(bytes, Constants.defaultCharset))
         } else {
           logger.error(response.toString)
           //将错误信息返回
@@ -64,7 +60,7 @@ trait GraphqlExecution extends LazyLogging {
     val execution = ExecutionInput.newExecutionInput(request.toString).context(context)
     val executionId = UUID.randomUUID().getLeastSignificantBits.toHexString
     execution.executionId(ExecutionId.from(executionId))
-    val varargs = gson.fromJson(request.getVariables(), classOf[java.util.Map[String, Object]])
+    val varargs = Constants.gson.fromJson(request.getVariables(), classOf[java.util.Map[String, Object]])
     if (Objects.nonNull(varargs)) {
       execution.variables(varargs)
     }
@@ -93,7 +89,7 @@ trait GraphqlExecution extends LazyLogging {
         promise.success(t)
       }
     })
-    promise.future.map(r => gson.toJson(r))
+    promise.future.map(r => Constants.gson.toJson(r))
   }
 
 }

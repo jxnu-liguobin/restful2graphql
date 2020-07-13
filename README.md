@@ -121,7 +121,7 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 > 这里自动生成的语句实际会有很多的多余字段，需要排除掉，可以在application.conf中配置
 
 1. 所有 graphql schema 放在 all.graphql 中
-2. 启动 Rest2GraphqlForwardServer.scala
+2. 启动 ForwardServerBootstrap.scala
 3. 使用 restful 请求 graphql
 
 **使用 restful 完成 crud**

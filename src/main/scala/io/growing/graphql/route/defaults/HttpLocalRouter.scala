@@ -1,4 +1,4 @@
-package io.growing.graphql.routes
+package io.growing.graphql.route.defaults
 
 import io.growing.graphql.GraphqlExecution
 

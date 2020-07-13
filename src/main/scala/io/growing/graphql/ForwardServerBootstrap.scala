@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import io.growing.dryad.ServiceProvider
 import io.growing.dryad.portal.Schema
-import io.growing.graphql.routes.{ HealthyRouter, HttpForwardRouter }
+import io.growing.graphql.route.defaults.{ HealthyRouter, HttpForwardRouter }
 
 import scala.concurrent.Future
 import scala.io.StdIn
@@ -14,12 +14,12 @@ import scala.util.{ Failure, Success, Try }
 
 /**
  * 1.使用akkahttp转发请求
- * 2.调用本地graphql时不需要此server
+ * 2.调用本地graphql时不需要此server，忽略
  *
  * @author liguobin@growingio.com
  * @version 1.0,2020/7/7
  */
-object Rest2GraphqlForwardServer extends App with HttpForwardRouter with HealthyRouter {
+object ForwardServerBootstrap extends App with HttpForwardRouter with HealthyRouter {
 
   private val (host, port) = Config.getRestfulServerConfig()
   private[this] val serviceProvider = ServiceProvider()

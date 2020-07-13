@@ -1,5 +1,6 @@
 package io.growing.graphql
 
+import com.google.gson.GsonBuilder
 import okhttp3.MediaType
 
 /**
@@ -9,7 +10,8 @@ import okhttp3.MediaType
  */
 object Constants {
 
-  val charset = "utf8"
+
+  val defaultCharset = "utf8"
   val json = MediaType.parse("application/json; charset=utf-8")
 
 
@@ -18,5 +20,8 @@ object Constants {
   val XRequestId = "X-Request-Id"
   val XInnerUserId = "X-Inner-User-Id"
   val XRealIP = "X-Real-IP"
+
+  lazy val gson = new GsonBuilder().serializeNulls().create()
+
 
 }

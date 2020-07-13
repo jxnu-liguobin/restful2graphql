@@ -178,30 +178,29 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 ```
 graphql {
 
-  #1.直接将 schema 放在里面，或者其他schema合并后放到这里面，不要放在`src/main/resources/gql`目录，会被覆盖
-  #2.该路径对应 gqlg --schemaFilePath参数的值
+  # 直接将 schema 放在里面，或者其他schema合并后放到这里面，不要放在`src/main/resources/gql`目录，会被覆盖
+  # 该路径对应 gqlg --schemaFilePath参数的值
   schema.path = "src/main/resources/all.graphql"
-  #3.`src/main/resources/gql`，该路径对应 gqlg --destDirPath 参数的值
+  
+  # `src/main/resources/gql`，该路径对应 gqlg --destDirPath 参数的值
   gql.folder = "gql"
+  
+  # 因为定义的是必须存在，查出的数可能为空，不兼容，需要排除，对于嵌套逻辑只需要排除最外层
+  # 之所以配置是这样的，是因为生成的 graphql query 就是空格隔开，这样不需要的字段，直接粘贴复制到这里即可
   exclude {
-   # 因为定义的是必须存在，查出的数可能为空，不兼容，需要排除，对于嵌套逻辑只需要排除最外层
-   # 之所以配置是这样的，是因为生成的 graphql query 就是空格隔开，这样不需要的字段，直接粘贴复制到这里即可
    userVariables = "projectId type valueType"
    userVariable = "projectId type valueType"
    createUserVariable = "id projectId key type description isSystem creatorId createdAt updaterId updatedAt creator updater valueType "
    updateUserVariable = "id projectId key type description isSystem creatorId createdAt updaterId updatedAt creator updater valueType "
    deleteUserVariable = "id projectId key type description isSystem creatorId createdAt updaterId updatedAt creator updater valueType "
+   
   }
 
-  # graphql服务的地址
-  # url = "http://localhost:8086/projects/%s/graphql"
-
-  # 此地址的 graphql 请求是经过 gateway 的
+  # graphql服务的地址，仅支持格式：http://localhost:8086/projects/%s/graphql（一个占位符） 或 http://gdp-dev.growingio.com/graphql（无占位符）
   url = "http://gdp-dev.growingio.com/graphql"
 
-  # graphql鉴权请求头的key，应该在 restful 请求时携带服务器的InternalToken，这里默认使用 cookie （可以使用 token 或者 cookie）
+  # graphql鉴权请求头的key
   auth {
-    # 必须传
     key = "Cookie"
   }
 }
@@ -219,7 +218,7 @@ dryad {
 
   service {
     http {
-      # 转发接口的预定义前缀，目前只支持：/forward/projects/:project_id和/forward/projects 两种路径，其中单词可以替换，分隔符数量不能改
+      # 转发接口的预定义前缀，其中单词可以替换，分隔符数量不能改！
       prefix = "/forward/projects/:project_id"
       port = 8080
       pattern = "/.*"

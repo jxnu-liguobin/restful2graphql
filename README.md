@@ -175,37 +175,19 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 
 ## 可选配置
 
+配置使用查看 development.conf 
+
 ```
 graphql {
 
-  # 直接将 schema 放在里面，或者其他schema合并后放到这里面，不要放在`src/main/resources/gql`目录，会被覆盖
-  # 该路径对应 gqlg --schemaFilePath参数的值
   schema.path = "src/main/resources/all.graphql"
-  
-  # `src/main/resources/gql`，该路径对应 gqlg --destDirPath 参数的值
   gql.folder = "gql"
-  
-  # 因为定义的是必须存在，查出的数可能为空，不兼容，需要排除，对于嵌套逻辑只需要排除最外层
-  # 之所以配置是这样的，是因为生成的 graphql query 就是空格隔开，这样不需要的字段，直接粘贴复制到这里即可
-  exclude {
-   userVariables = "projectId type valueType"
-   userVariable = "projectId type valueType"
-   createUserVariable = "id projectId key type description isSystem creatorId createdAt updaterId updatedAt creator updater valueType "
-   updateUserVariable = "id projectId key type description isSystem creatorId createdAt updaterId updatedAt creator updater valueType "
-   deleteUserVariable = "id projectId key type description isSystem creatorId createdAt updaterId updatedAt creator updater valueType "
-   
-  }
-
-  # graphql服务的地址，仅支持格式：http://localhost:8086/projects/%s/graphql（一个占位符） 或 http://gdp-dev.growingio.com/graphql（无占位符）
   url = "http://gdp-dev.growingio.com/graphql"
-
-  # graphql鉴权请求头的key
   auth {
     key = "Cookie"
   }
 }
 
-# dryad框架的参数
 dryad {
 
   enabled = false
@@ -218,7 +200,6 @@ dryad {
 
   service {
     http {
-      # 转发接口的预定义前缀，其中单词可以替换，分隔符数量不能改！
       prefix = "/forward/projects/:project_id"
       port = 8080
       pattern = "/.*"

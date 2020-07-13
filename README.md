@@ -118,7 +118,7 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 
 在 all.graphql 中是所有需要转发的 graphql schmea。最终会在 gql/ 目录下生成所有 *.gql 语句。
 
-> 这里自动生成的语句实际会有很多的多余字段，需要排除掉。
+> 这里自动生成的语句实际会有很多的多余字段，需要排除掉，可以在application.conf中配置
 
 1. 所有 graphql schema 放在 all.graphql 中
 2. 启动 Rest2GraphqlForwardServer.scala

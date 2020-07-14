@@ -60,6 +60,7 @@ case class RestRequest(restOperation: RestOperation, resource: String, contextPa
       case RestOperation.CREATE => restOperation.toString + graphqlType.capitalize
       case RestOperation.DELETE if isBatch => "batch" + restOperation.toString.capitalize + graphqlType.capitalize
       case RestOperation.DELETE => restOperation.toString + graphqlType.capitalize
+      case RestOperation.GET if isBatch => graphqlType + "s"
       case RestOperation.GET => graphqlType
       case RestOperation.UPDATE if isBatch => "batch" + restOperation.toString.capitalize + graphqlType.capitalize
       case RestOperation.UPDATE => restOperation.toString + graphqlType.capitalize

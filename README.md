@@ -122,6 +122,23 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 
 - GET http://localhost:8080/v1/projects/WlGk4Daj/user-variables 
     - 将会使用 HTTP 调用 graphql api: `userVariables: [UserVariable]`
+- response
+```json
+[
+    {
+        "name": "test-restful9",
+        "description": "132",
+        "id": "3mpx7MQO",
+        "key": "test_restful9"
+    },
+    {
+        "name": "test-restful8",
+        "description": "132",
+        "id": "qVDgN1Gk",
+        "key": "test_restful8"
+    }
+]
+```
 - POST http://localhost:8080/v1/projects/WlGk4Daj/user-variables 
     - 将会使用 HTTP 调用 graphql api: `createUserVariable(userVariable: VariableInput!): UserVariable!`
     - requestBody 

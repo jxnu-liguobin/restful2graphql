@@ -26,5 +26,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.1",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
   "com.graphql-java" % "graphql-java" % "14.0",
-  "com.google.code.gson" % "gson" % "2.8.6"
+  "com.google.code.gson" % "gson" % "2.8.6",
+  "org.json" % "json" % "20190722"
 ) ++ log4j2 ++ dryad

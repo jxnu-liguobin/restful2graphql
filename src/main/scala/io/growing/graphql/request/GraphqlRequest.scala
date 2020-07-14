@@ -51,6 +51,13 @@ class GraphqlRequest(operationName: String, variables: Option[String] = None, qu
   def getVariables(): String = variables.getOrElse("{}")
 
   /**
+   * 获取操作名
+   *
+   * @return
+   */
+  def getOperationName() = operationName
+
+  /**
    * 生成graphql调用的body
    *
    * @return

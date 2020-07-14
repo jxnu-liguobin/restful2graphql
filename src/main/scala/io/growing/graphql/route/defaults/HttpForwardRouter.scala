@@ -68,7 +68,7 @@ trait HttpForwardRouter extends HttpSupport with GraphqlExecution {
               decodeRequest {
                 //查询全部时为空
                 entity(as[JsValue]) { requestBody =>
-                  val req = buildRestRequest(RestOperation.GET)(projectId, typ, None, authValue, Some(requestBody))
+                  val req = buildRestRequest(RestOperation.GET)(projectId, typ, None, authValue, Some(requestBody), isBatch = true)
                   val ret = executeRequest(req.toGraphqlRequest())
                   resultJson(ret)
                 }
@@ -80,7 +80,7 @@ trait HttpForwardRouter extends HttpSupport with GraphqlExecution {
               headerValueByName(authKey) { authValue =>
                 decodeRequest {
                   entity(as[JsValue]) { requestBody =>
-                    val req = buildRestRequest(RestOperation.CREATE)(projectId, typ, None, authValue, Some(requestBody))
+                    val req = buildRestRequest(RestOperation.CREATE)(projectId, typ, None, authValue, Some(requestBody), isBatch = true)
                     val ret = executeRequest(req.toGraphqlRequest())
                     resultJson(ret)
 

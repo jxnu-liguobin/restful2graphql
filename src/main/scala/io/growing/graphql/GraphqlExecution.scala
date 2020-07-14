@@ -8,6 +8,7 @@ import graphql.{ ExecutionInput, ExecutionResult, GraphQL, GraphQLContext }
 import graphql.execution.ExecutionId
 import io.growing.graphql.request.GraphqlRequest
 import okhttp3._
+import org.json.JSONObject
 import spray.json.{ JsNumber, JsObject, JsString }
 
 import scala.concurrent.{ ExecutionContext, Future, Promise }
@@ -20,13 +21,13 @@ import scala.concurrent.{ ExecutionContext, Future, Promise }
  */
 trait GraphqlExecution extends LazyLogging {
 
-  def executeRequest(request: GraphqlRequest): Future[String] = {
+  def executeRequest(request: GraphqlRequest)(implicit ec: ExecutionContext): Future[String] = {
     val body = request.toString
     logger.info(s"graphql request: \n$body")
     val url = request.getExecuteUrl()
     val rb = new Request.Builder().url(url).addHeader(request.getAuthToken()._1, request.getAuthToken()._2)
       .post(RequestBody.create(body, Constants.json))
-    val promise = Promise[String]
+    val promise = Promise[Any]
 
     OkHttp.client.newCall(rb.build()).enqueue(new Callback {
 
@@ -37,7 +38,13 @@ trait GraphqlExecution extends LazyLogging {
       override def onResponse(call: Call, response: Response): Unit = {
         if (response.isSuccessful) {
           val bytes = response.body().bytes()
-          promise.success(new String(bytes, Constants.defaultCharset))
+          val result = new String(bytes, Constants.defaultCharset)
+          val jsonObject = new JSONObject(result)
+          val res = if (jsonObject.has("data")) {
+            val data = jsonObject.getJSONObject("data")
+            data.get(request.getOperationName())
+          } else null
+          promise.success(res)
         } else {
           logger.error(response.toString)
           //将错误信息返回
@@ -46,7 +53,7 @@ trait GraphqlExecution extends LazyLogging {
         }
       }
     })
-    promise.future
+    promise.future.map(_.toString)
   }
 
   //未测试

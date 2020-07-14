@@ -31,7 +31,7 @@ trait HttpForwardRouter extends HttpSupport with GraphqlExecution {
 
   override def route: Route = {
     path(ProjectMatcher.getRestUriPathMather / ResourceMatcher / ResourceIdMatcher) { (projectId, typ, id) =>
-      // URI    /forward/projects/:project_id/:resource/:resource_id
+      // URI    /v1/projects/:project_id/:resources/:resource_id
       concat(
         get {
           headerValueByName(authKey) { authValue =>
@@ -60,12 +60,13 @@ trait HttpForwardRouter extends HttpSupport with GraphqlExecution {
         }
       )
     } ~
-      // URI    /forward/projects/:project_id/:resources
+      // URI    /v1/projects/:project_id/:resources
       path(ProjectMatcher.getRestUriPathMather / ResourceMatcher) { (projectId, typ) =>
         concat(
           get {
             headerValueByName(authKey) { authValue =>
               decodeRequest {
+                //查询全部时为空
                 entity(as[JsValue]) { requestBody =>
                   val req = buildRestRequest(RestOperation.GET)(projectId, typ, None, authValue, Some(requestBody))
                   val ret = executeRequest(req.toGraphqlRequest())

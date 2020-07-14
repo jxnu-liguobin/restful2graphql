@@ -1,5 +1,6 @@
 package io.growing.graphql.request
 
+import com.google.common.base.CaseFormat
 import com.typesafe.scalalogging.LazyLogging
 import io.growing.graphql.RestOperation
 import io.growing.graphql.RestOperation.RestOperation
@@ -52,18 +53,16 @@ case class RestRequest(restOperation: RestOperation, resource: String, contextPa
    * @return
    */
   def buildOperationName: String = {
+    val converter = CaseFormat.LOWER_HYPHEN.converterTo(CaseFormat.LOWER_CAMEL)
+    val realResource = converter.convert(resource)
+    val graphqlType = realResource.substring(0, realResource.length - 1)
     val operation = restOperation match {
-      case RestOperation.CREATE => restOperation.toString + resource.capitalize
-      case RestOperation.DELETE if isBatch => "batch" + restOperation.toString.capitalize + resource.capitalize
-      case RestOperation.DELETE => restOperation.toString + resource.capitalize
-      // 与graphql定义相同，查询所有资源时，有可能结尾是s，取决于graphql的schema定义
-      // 一般查询不会在schema的fetcher名称前面加get，所以 getOne getAll getList应该是一个路径，如：
-      // getOne: userVariable
-      // getAll: userVariables
-      // getList: userVariables + requestBody
-      case RestOperation.GET => resource
-      case RestOperation.UPDATE if isBatch => "batch" + restOperation.toString.capitalize + resource.capitalize
-      case RestOperation.UPDATE => restOperation.toString + resource.capitalize
+      case RestOperation.CREATE => restOperation.toString + graphqlType.capitalize
+      case RestOperation.DELETE if isBatch => "batch" + restOperation.toString.capitalize + graphqlType.capitalize
+      case RestOperation.DELETE => restOperation.toString + graphqlType.capitalize
+      case RestOperation.GET => graphqlType
+      case RestOperation.UPDATE if isBatch => "batch" + restOperation.toString.capitalize + graphqlType.capitalize
+      case RestOperation.UPDATE => restOperation.toString + graphqlType.capitalize
     }
     logger.info(s"build restful request method mapping to graphql fetcher: \n$operation")
     operation

@@ -43,7 +43,7 @@ trait HttpSupport extends Directives with HttpRouter with GraphqlParser {
       //目前只支持一个预定义路径参数，就是项目id
       if (uri.count(_ == ':') == 1 && uri.count(_ == '/') == 2) {
         val pathArray = uri.split("/")
-        //意思是：匹配 forward/projects/:project_id 和 forward/projects
+        //意思是：匹配 v1/projects/:project_id 和 v1/projects
         val matcher: PathMatcher1[Option[String]] = s"${pathArray(0)}" / s"${pathArray(1)}" / ResourceIdMatcher.?
         matcher
       } else {

@@ -71,23 +71,18 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 约定对应关系如下：
 针对通用 restful 接口，其中 requestBody 是可选，每个资源有以下八个独立接口，分四种HTTP方法类型：
 
-> 与 mutation 不同，一般 query 定义不会在 schema 的 fetcher 名称前面加 get，所以 getOne getAll getList 应该是一个路径，如：
-> getOne: userVariable
-> getAll: userVariables
-> getList: userVariables + requestBody
+实际 URI 只有两种格式，requestBody：json
 
-实际 URI 只有两种格式
+1. 查询一个 GET      /v1/projects/:project_id/:resources/:resource_id
+2. 查询所有 GET      /v1/projects/:project_id/:resources                                (requestBody: {})
+3. 批量查询 GET      /v1/projects/:project_id/:resources                                (requestBody)
+4. 更新一个 PUT      /v1/projects/:project_id/:resources/:resource_id                   (requestBody)
+5. 批量更新 PUT      /v1/projects/:project_id/:resources                                (requestBody 有id)
+6. 创建一个 POST     /v1/projects/:project_id/:resources                                (requestBody)
+7. 删除一个 DELETE   /v1/projects/:project_id/:resources/:resource_id 
+8. 批量删除 DELETE   /v1/projects/:project_id/:resources                                (requestBody都是id)
 
-1. 查询一个 GET      /forward/projects/:project_id/:resource/:resource_id
-2. 查询所有 GET      /forward/projects/:project_id/:resources
-3. 批量查询 GET      /forward/projects/:project_id/:resources                                (requestBody)
-4. 更新一个 PUT      /forward/projects/:project_id/:resource/:resource_id                    (requestBody)
-5. 批量更新 PUT      /forward/projects/:project_id/:resources                                (requestBody 有id)
-6. 创建一个 POST     /forward/projects/:project_id/:resource                                 (requestBody)
-7. 删除一个 DELETE   /forward/projects/:project_id/:resource/:resource_id 
-8. 批量删除 DELETE   /forward/projects/:project_id/:resources                                (requestBody都是id)
-
-- resource => graphql field operationName
+- resources => graphql field operationName
     - 就是 fetcher 方法定义去掉 update/delete/create 等前缀，再把首字符转为小写，因为前缀已经由 restful HTTP 方法来表示
 - requestBody => graphql field variables
 - resource_id => graphql fetcher param 
@@ -125,9 +120,9 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 
 **使用 restful 完成 crud**
 
-- GET http://localhost:8080/forward/projects/WlGk4Daj/userVariables 
+- GET http://localhost:8080/v1/projects/WlGk4Daj/user-variables 
     - 将会使用 HTTP 调用 graphql api: `userVariables: [UserVariable]`
-- POST http://localhost:8080/forward/projects/WlGk4Daj/userVariable 
+- POST http://localhost:8080/v1/projects/WlGk4Daj/user-variables 
     - 将会使用 HTTP 调用 graphql api: `createUserVariable(userVariable: VariableInput!): UserVariable!`
     - requestBody 
 ```json
@@ -157,9 +152,9 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 ```
 对用户来说，query 的拼写是痛苦的。
 
-- DELETE http://localhost:8080/forward/projects/WlGk4Daj/userVariable/y9pmLdQm # y9pmLdQm是一个HashId
+- DELETE http://localhost:8080/v1/projects/WlGk4Daj/user-variables/y9pmLdQm # y9pmLdQm是一个HashId
     - 将会使用 HTTP 调用 graphql api: `deleteUserVariable(id: HashId!): Boolean!`
-- PUT http://localhost:8080/forward/projects/WlGk4Daj/userVariable/y9pmLdQm
+- PUT http://localhost:8080/v1/projects/WlGk4Daj/user-variables/y9pmLdQm
     - 将会使用 HTTP 调用 graphql api: `updateUserVariable(id: HashId!, userVariable: VariableInput!): UserVariable!`
     - requestBody 当 id 字段在路径参数和 requestBody 都存在时，只会使用路径参数的
 ```json
@@ -200,7 +195,7 @@ dryad {
 
   service {
     http {
-      prefix = "/forward/projects/:project_id"
+      prefix = "/v1/projects/:project_id"
       port = 8080
       pattern = "/.*"
       check {

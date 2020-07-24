@@ -54,16 +54,16 @@ case class RestRequest(restOperation: RestOperation, resource: String, contextPa
    */
   def buildOperationName: String = {
     val converter = CaseFormat.LOWER_HYPHEN.converterTo(CaseFormat.LOWER_CAMEL)
-    val realResource = converter.convert(resource)
-    val graphqlType = realResource.substring(0, realResource.length - 1)
+    val resourceWithS = converter.convert(resource)
+    val resourceWithoutS = resourceWithS.substring(0, resourceWithS.length - 1)
     val operation = restOperation match {
-      case RestOperation.CREATE => restOperation.toString + graphqlType.capitalize
-      case RestOperation.DELETE if isBatch => "batch" + restOperation.toString.capitalize + graphqlType.capitalize
-      case RestOperation.DELETE => restOperation.toString + graphqlType.capitalize
-      case RestOperation.GET if isBatch => graphqlType + "s"
-      case RestOperation.GET => graphqlType
-      case RestOperation.UPDATE if isBatch => "batch" + restOperation.toString.capitalize + graphqlType.capitalize
-      case RestOperation.UPDATE => restOperation.toString + graphqlType.capitalize
+      case RestOperation.CREATE => restOperation.toString + resourceWithoutS.capitalize
+      case RestOperation.DELETE if isBatch => "batch" + restOperation.toString.capitalize + resourceWithS.capitalize
+      case RestOperation.DELETE => restOperation.toString + resourceWithoutS.capitalize
+      case RestOperation.GET if isBatch => resourceWithS
+      case RestOperation.GET => resourceWithoutS
+      case RestOperation.UPDATE if isBatch => "batch" + restOperation.toString.capitalize + resourceWithS.capitalize
+      case RestOperation.UPDATE => restOperation.toString + resourceWithoutS.capitalize
     }
     logger.info(s"build restful request method mapping to graphql fetcher: \n$operation")
     operation

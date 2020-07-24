@@ -49,6 +49,7 @@ restful2graphql
 * 对每个需要转发的服务，都需要额外编码
     - 新增两个 restful api 接口请求，并调用 graphql.executeAsync
     - 对不同的web框架需要重新编写接收请求的控制器
+    - 只能处理标准命名的 graphql
 
 难点：
 
@@ -56,6 +57,10 @@ restful2graphql
 * restful 映射到 graphql query
 * 如何忽略自动生成的 graphql query 中的多余字段
 * restful api 需要注册到服务注册中心供其他服务能调用（不关心被调用的 graphql api）
+
+
+> 这里不是说 restful 不能实现选择字段返回数据，而是这么做不如用 graphql。
+> 总的来说，使用方案一二，都比较复杂，依赖东西多，且不是可靠的操作，更好的方法是采用封装 client 提供 sdk 的方式，可以提供类型安全的请求。
 
 **示意图**
 
@@ -71,7 +76,7 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 约定对应关系如下：
 针对通用 restful 接口，其中 requestBody 是可选，每个资源有以下八个独立接口，分四种HTTP方法类型：
 
-实际 URI 只有两种格式，requestBody：json
+实际 URI 只有两种格式，requestBody：json，resources均采用后缀加s的复数，并且单词使用横线分割，如：user-variables
 
 1. 查询一个 GET      /v1/projects/:project_id/:resources/:resource_id
 2. 查询所有 GET      /v1/projects/:project_id/:resources                                (requestBody: {})
@@ -98,7 +103,7 @@ fetcher name = 操作+资源，如创建用户变量：createUserVariable，查�
 
 **注册实现**
 
-* 采用 dryad，仅注册两个 URI `/forawrd/projects/([\w]+), /forawrd/projects/([\w]+)/([\w]+)`
+* 采用 dryad，仅注册两个 URI `/v1/projects/([\w]+), /v1/projects/([\w]+)/([\w]+)`
 
 目前只支持，标准 result api 的 crud 转发到 graphql 的 mutation 和 query 
 
@@ -204,7 +209,7 @@ dryad {
 
   enabled = false
 
-  namespace = "gio-graphql-forawrd"
+  namespace = "gio-graphql-forward"
   group = "k8s-datatest"
 
   provider = "io.growing.dryad.consul.provider.ConsulConfigProvider"
